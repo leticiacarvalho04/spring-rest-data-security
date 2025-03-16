@@ -1,5 +1,6 @@
 package br.edu.fatecsjc.lgnspringapi.dto;
 
+import br.edu.fatecsjc.lgnspringapi.entity.Marathons;
 import br.edu.fatecsjc.lgnspringapi.entity.Member;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -20,4 +21,5 @@ public class MemberDTO {
     private Long id;
     private String name;
     private Integer age;
+    private List<Marathons> marathons;
 }

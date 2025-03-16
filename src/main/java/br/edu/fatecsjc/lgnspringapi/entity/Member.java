@@ -1,5 +1,7 @@
 package br.edu.fatecsjc.lgnspringapi.entity;
 
+import java.util.List;
+
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -21,4 +23,11 @@ public class Member {
     @ManyToOne
     @JoinColumn(name="group_id", nullable=false)
     private Group group;
+    
+    @ManyToMany
+    @JoinTable(
+      name = "member_marathon", 
+      joinColumns = @JoinColumn(name = "member_id"), 
+      inverseJoinColumns = @JoinColumn(name = "marathon_id"))
+    private List<Marathons> marathons;
 }
