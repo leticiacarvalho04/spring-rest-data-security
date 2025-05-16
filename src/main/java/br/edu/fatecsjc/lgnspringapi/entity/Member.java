@@ -1,9 +1,10 @@
 package br.edu.fatecsjc.lgnspringapi.entity;
 
-import java.util.List;
-
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -14,6 +15,7 @@ import lombok.*;
 @Entity
 @Table(name = "member")
 public class Member {
+
     @Id
     @SequenceGenerator(initialValue = 1, allocationSize = 1, name = "member_id_gen", sequenceName = "member_seq")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "member_id_gen")
@@ -22,7 +24,7 @@ public class Member {
     private String name;
     private String email;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "group_id", nullable = false)
     private Group group;
 
@@ -32,5 +34,6 @@ public class Member {
         joinColumns = @JoinColumn(name = "member_id"),
         inverseJoinColumns = @JoinColumn(name = "marathon_id")
     )
-    private List<Marathons> marathons;
+    @Builder.Default
+    private List<Marathons> marathons = new ArrayList<>();
 }

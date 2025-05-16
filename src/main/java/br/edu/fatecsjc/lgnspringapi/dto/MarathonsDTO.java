@@ -19,5 +19,5 @@ public class MarathonsDTO {
     private String identification;
     private Double weight;
     private int score;
-    private List<Member> members;
+    private List<MemberDTO> members;  // Corrigido para usar DTO
 }

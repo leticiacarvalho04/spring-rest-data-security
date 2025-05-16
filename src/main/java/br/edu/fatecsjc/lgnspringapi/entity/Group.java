@@ -5,6 +5,7 @@ import lombok.*;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -14,7 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 @Entity
-@Table(name = "group")
+@Table(name = "groups")
 public class Group {
     @Id
     @SequenceGenerator(initialValue = 1, allocationSize = 1, name = "group_id_gen", sequenceName = "group_seq")
@@ -28,5 +29,5 @@ public class Group {
     private Organization organization;
 
     @OneToMany(mappedBy = "group", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private List<Member> members;
+    private List<Member> members = new ArrayList<>();
 }
