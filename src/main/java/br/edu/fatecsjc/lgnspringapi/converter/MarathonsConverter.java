@@ -17,9 +17,9 @@ import br.edu.fatecsjc.lgnspringapi.entity.Marathons;
 public class MarathonsConverter implements Converter<Marathons, MarathonsDTO> {
     @Autowired
     private ModelMapper modelMapper;
-    
+
     private TypeMap<MarathonsDTO, Marathons> propertyMapperDto;
-    
+
     @Override
     public Marathons convertToEntity(MarathonsDTO dto) {
         if (propertyMapperDto == null) {
@@ -34,9 +34,9 @@ public class MarathonsConverter implements Converter<Marathons, MarathonsDTO> {
         if (entity.getMembers() != null) {
             entity.getMembers().forEach(member -> {
                 if (member.getMarathons() == null) {
-                    member.setMarathons(new ArrayList<>()); 
+                    member.setMarathons(new ArrayList<>());
                 }
-                member.getMarathons().add(entity); 
+                member.getMarathons().add(entity);
             });
         }
 
@@ -54,41 +54,41 @@ public class MarathonsConverter implements Converter<Marathons, MarathonsDTO> {
         propertyMapperDto.setProvider(marathonsProvider);
         Marathons newEntity = modelMapper.map(dto, Marathons.class);
 
-        if (newEntity.getMembers() != null) { 
+        if (newEntity.getMembers() != null) {
             newEntity.getMembers().forEach(member -> {
                 if (member.getMarathons() == null) {
-                    member.setMarathons(new ArrayList<>()); 
+                    member.setMarathons(new ArrayList<>());
                 }
-                member.getMarathons().add(newEntity); 
+                member.getMarathons().add(newEntity);
             });
         }
 
         return newEntity;
     }
-    
+
     @Override
     public MarathonsDTO convertToDto(Marathons entity) {
         return modelMapper.map(entity, MarathonsDTO.class);
     }
-    
+
     @Override
     public List<Marathons> convertToEntity(List<MarathonsDTO> dtos) {
         List<Marathons> marathons = modelMapper.map(dtos, new TypeToken<List<Marathons>>(){}.getType());
-        
-        marathons.forEach(marathon -> { 
-            if (marathon.getMembers() != null) { 
+
+        marathons.forEach(marathon -> {
+            if (marathon.getMembers() != null) {
                 marathon.getMembers().forEach(member -> {
                     if (member.getMarathons() == null) {
-                        member.setMarathons(new ArrayList<>()); 
+                        member.setMarathons(new ArrayList<>());
                     }
-                    member.getMarathons().add(marathon); 
+                    member.getMarathons().add(marathon);
                 });
             }
         });
 
-        return marathons; 
+        return marathons;
     }
-    
+
     @Override
     public List<MarathonsDTO> convertToDto(List<Marathons> entities) {
         return modelMapper.map(entities, new TypeToken<List<MarathonsDTO>>(){}.getType());

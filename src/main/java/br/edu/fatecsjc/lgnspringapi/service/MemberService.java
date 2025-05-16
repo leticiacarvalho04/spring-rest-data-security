@@ -14,12 +14,13 @@ import jakarta.transaction.Transactional;
 
 @Service
 public class MemberService {
+
     @Autowired
     private MemberRepository memberRepository;
-    
+
     @Autowired
     private MarathonsRepository marathonRepository;
-    
+
     @Autowired
     private MemberConverter memberConverter;
 
@@ -29,34 +30,38 @@ public class MemberService {
 
     public MemberDTO findById(Long id) {
         Member member = memberRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Membro não encontrado!"));
-        return memberConverter.convertToDto(member);
+            .orElse(null);
+        return member != null ? memberConverter.convertToDto(member) : null;
     }
 
     @Transactional
     public MemberDTO save(Long id, MemberDTO dto) {
         Member entity = memberRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Membro não encontrado!"));
+            .orElse(null);
 
-        marathonRepository.deleteByMembers(entity);
+        if (entity != null) {
+            marathonRepository.deleteByMembers(entity);
 
-        if (entity.getMarathons() != null) {
-            entity.getMarathons().clear();
+            if (entity.getMarathons() != null) {
+                entity.getMarathons().clear();
+            }
+
+            Member memberToSaved = memberConverter.convertToEntity(dto, entity);
+
+            if (memberToSaved.getMarathons() != null) {
+                memberToSaved.getMarathons().forEach(marathon -> {
+                    if (marathon.getMembers() == null) {
+                        marathon.setMembers(new java.util.ArrayList<>());
+                    }
+                    marathon.getMembers().add(memberToSaved);
+                });
+            }
+
+            Member memberReturned = memberRepository.save(memberToSaved);
+            return memberConverter.convertToDto(memberReturned);
         }
 
-        Member memberToSaved = memberConverter.convertToEntity(dto, entity);
-
-        if (memberToSaved.getMarathons() != null) {
-            memberToSaved.getMarathons().forEach(marathon -> {
-                if (marathon.getMembers() == null) {
-                    marathon.setMembers(new java.util.ArrayList<>()); 
-                }
-                marathon.getMembers().add(memberToSaved); 
-            });
-        }
-
-        Member memberReturned = memberRepository.save(memberToSaved);
-        return memberConverter.convertToDto(memberReturned);
+        return null;
     }
 
     public MemberDTO save(MemberDTO dto) {

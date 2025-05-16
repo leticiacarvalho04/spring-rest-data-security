@@ -14,17 +14,19 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 @Entity
-@Table(name = "groups")
+@Table(name = "group")
 public class Group {
     @Id
-    @SequenceGenerator(initialValue = 1, allocationSize = 1, name = "groupsidgen", sequenceName = "groups_seq")
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "groupsidgen")
+    @SequenceGenerator(initialValue = 1, allocationSize = 1, name = "group_id_gen", sequenceName = "group_seq")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "group_id_gen")
     private Long id;
+
     private String name;
-    @OneToMany(mappedBy="group", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    private List<Member> members;
-    
+
     @ManyToOne
-    @JoinColumn(name="organization_id", nullable=false)
+    @JoinColumn(name = "organization_id", nullable = false)
     private Organization organization;
+
+    @OneToMany(mappedBy = "group", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<Member> members;
 }

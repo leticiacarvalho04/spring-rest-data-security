@@ -12,22 +12,25 @@ import lombok.*;
 @NoArgsConstructor
 @Builder
 @Entity
-@Table(name = "members")
+@Table(name = "member")
 public class Member {
     @Id
-    @SequenceGenerator(initialValue = 1, allocationSize = 1, name = "membersidgen", sequenceName = "members_seq")
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "membersidgen")
+    @SequenceGenerator(initialValue = 1, allocationSize = 1, name = "member_id_gen", sequenceName = "member_seq")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "member_id_gen")
     private Long id;
+
     private String name;
-    private Integer age;
+    private String email;
+
     @ManyToOne
-    @JoinColumn(name="group_id", nullable=false)
+    @JoinColumn(name = "group_id", nullable = false)
     private Group group;
-    
-    @ManyToMany
+
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
-      name = "member_marathon", 
-      joinColumns = @JoinColumn(name = "member_id"), 
-      inverseJoinColumns = @JoinColumn(name = "marathon_id"))
+        name = "member_marathon",
+        joinColumns = @JoinColumn(name = "member_id"),
+        inverseJoinColumns = @JoinColumn(name = "marathon_id")
+    )
     private List<Marathons> marathons;
 }

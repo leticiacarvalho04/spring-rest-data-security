@@ -15,16 +15,17 @@ import org.hibernate.annotations.LazyCollectionOption;
 @NoArgsConstructor
 @Builder
 @Entity
-@Table(name = "marathons")
+@Table(name = "marathon")
 public class Marathons {
-	@Id
-    @SequenceGenerator(initialValue = 1, allocationSize = 1, name = "groupsidgen", sequenceName = "groups_seq")
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "groupsidgen")
-	private Long id;
-	private String identification;
-	private Double weight;
-	private Integer score;
-	
-	@ManyToMany(mappedBy = "marathons", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @Id
+    @SequenceGenerator(initialValue = 1, allocationSize = 1, name = "marathon_id_gen", sequenceName = "marathon_seq")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "marathon_id_gen")
+    private Long id;
+
+    private String identification;
+    private Double weight;
+    private Integer score;
+
+    @ManyToMany(mappedBy = "marathons")
     private List<Member> members;
 }

@@ -14,10 +14,13 @@ import jakarta.transaction.Transactional;
 
 @Service
 public class OrganizationService {
-	@Autowired
+
+    @Autowired
     private OrganizationRepository organizationRepository;
+
     @Autowired
     private GroupRepository groupRepository;
+
     @Autowired
     private OrganizationConverter organizationConverter;
 
@@ -26,30 +29,38 @@ public class OrganizationService {
     }
 
     public OrganizationDTO findById(Long id) {
-        return organizationConverter.convertToDto(organizationRepository.findById(id).get());
+        return organizationRepository.findById(id)
+            .map(organizationConverter::convertToDto)
+            .orElse(null);
     }
 
     @Transactional
     public OrganizationDTO save(Long id, OrganizationDTO dto) {
-    	Organization entity = organizationRepository.findById(id).get();
-        groupRepository.deleteGroupByOrganization(entity);
-        entity.getGroup().clear();
+        Organization entity = organizationRepository.findById(id).orElse(null);
 
-        Organization organizationToSaved = organizationConverter.convertToEntity(dto, entity);
-        organizationToSaved.getGroup().forEach( group -> {
-            group.setOrganization(organizationToSaved);
-        });
+        if (entity != null) {
+            groupRepository.deleteGroupByOrganization(entity);
+            entity.getGroups().clear();
+
+            Organization organizationToSaved = organizationConverter.convertToEntity(dto, entity);
+            organizationToSaved.getGroups().forEach(group -> {
+                group.setOrganization(organizationToSaved);
+            });
+
+            Organization organizationReturned = organizationRepository.save(organizationToSaved);
+            return organizationConverter.convertToDto(organizationReturned);
+        }
+
+        return null;
+    }
+
+    public OrganizationDTO save(OrganizationDTO dto) {
+        Organization organizationToSaved = organizationConverter.convertToEntity(dto);
         Organization organizationReturned = organizationRepository.save(organizationToSaved);
         return organizationConverter.convertToDto(organizationReturned);
     }
 
-    public OrganizationDTO save(OrganizationDTO dto) {
-    	Organization organizationToSaved = organizationConverter.convertToEntity(dto);
-    	Organization organizationReturned = organizationRepository.save(organizationToSaved);
-        return organizationConverter.convertToDto(organizationReturned);
-    }
-
     public void delete(Long id) {
-    	organizationRepository.deleteById(id);
+        organizationRepository.deleteById(id);
     }
 }

@@ -17,16 +17,16 @@ import lombok.NoArgsConstructor;
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class OrganizationDTO {
-	@Schema(hidden = true)
-	private Long id;
-	private String name;
-	private String number;
-	private String street;
-	private String neighborhood;
-	private String CEP;
-	private String municipality;
-	private String state;
-	private String institutionName;
-	private String hostCountry;
-	private List<Group> group;
+    @Schema(hidden = true)
+    private Long id;
+    private String name;
+    private String number;
+    private String street;
+    private String neighborhood;
+    private String CEP;
+    private String municipality;
+    private String state;
+    private String institutionName;
+    private String hostCountry;
+    private List<Group> group;
 }

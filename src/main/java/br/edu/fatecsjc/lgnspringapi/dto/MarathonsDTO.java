@@ -14,10 +14,10 @@ import lombok.*;
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class MarathonsDTO {
-	@Schema(hidden = true)
-	private Long id;
-	private String identification;
-	private Double weight;
-	private int score;
-	private List<Member> members;
+    @Schema(hidden = true)
+    private Long id;
+    private String identification;
+    private Double weight;
+    private int score;
+    private List<Member> members;
 }

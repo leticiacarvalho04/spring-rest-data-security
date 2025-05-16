@@ -33,9 +33,10 @@ public class MemberConverter implements Converter<Member, MemberDTO> {
         if (entity.getMarathons() != null) {
             entity.getMarathons().forEach(marathon -> {
                 if (marathon.getMembers() == null) {
-                    marathon.setMembers(new java.util.ArrayList<>()); 
-                marathon.getMembers().add(entity); 
-            }});
+                    marathon.setMembers(new java.util.ArrayList<>());
+                }
+                marathon.getMembers().add(entity);
+            });
         }
 
         return entity;

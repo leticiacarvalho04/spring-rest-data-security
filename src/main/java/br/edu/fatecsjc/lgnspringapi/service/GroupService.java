@@ -14,10 +14,13 @@ import java.util.List;
 
 @Service
 public class GroupService {
+
     @Autowired
     private GroupRepository groupRepository;
+
     @Autowired
     private MemberRepository memberRepository;
+
     @Autowired
     private GroupConverter groupConverter;
 
@@ -31,16 +34,20 @@ public class GroupService {
 
     @Transactional
     public GroupDTO save(Long id, GroupDTO dto) {
-        Group entity = groupRepository.findById(id).get();
-        memberRepository.deleteMembersByGroup(entity);
-        entity.getMembers().clear();
+        Group entity = groupRepository.findById(id).orElse(null);
+        if (entity != null) {
+            memberRepository.deleteMembersByGroup(entity);
+            entity.getMembers().clear();
 
-        Group groupToSaved = groupConverter.convertToEntity(dto, entity);
-        groupToSaved.getMembers().forEach( member -> {
-            member.setGroup(groupToSaved);
-        });
-        Group groupReturned = groupRepository.save(groupToSaved);
-        return groupConverter.convertToDto(groupReturned);
+            Group groupToSaved = groupConverter.convertToEntity(dto, entity);
+            groupToSaved.getMembers().forEach(member -> {
+                member.setGroup(groupToSaved);
+            });
+
+            Group groupReturned = groupRepository.save(groupToSaved);
+            return groupConverter.convertToDto(groupReturned);
+        }
+        return null;
     }
 
     public GroupDTO save(GroupDTO dto) {

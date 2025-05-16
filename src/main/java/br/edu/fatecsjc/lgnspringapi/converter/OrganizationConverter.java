@@ -14,12 +14,13 @@ import br.edu.fatecsjc.lgnspringapi.entity.Organization;
 
 @Component
 public class OrganizationConverter  implements Converter<Organization, OrganizationDTO> {
-	@Autowired
+
+    @Autowired
     private ModelMapper modelMapper;
-	
-	private TypeMap<OrganizationDTO, Organization> propertyMapperDto;
-	
-	@Override
+
+    private TypeMap<OrganizationDTO, Organization> propertyMapperDto;
+
+    @Override
     public Organization convertToEntity(OrganizationDTO dto) {
         if(propertyMapperDto == null) {
             propertyMapperDto = modelMapper.createTypeMap(OrganizationDTO.class, Organization.class);
@@ -30,7 +31,7 @@ public class OrganizationConverter  implements Converter<Organization, Organizat
         Provider<Organization> organizationProvider = p -> new Organization();
         propertyMapperDto.setProvider(organizationProvider);
 
-        entity.getGroup().forEach(m -> {
+        entity.getGroups().forEach(m -> {
             m.setOrganization(entity);
         });
         return entity;
@@ -47,7 +48,7 @@ public class OrganizationConverter  implements Converter<Organization, Organizat
         propertyMapperDto.setProvider(organizationProvider);
 
         Organization newEntity = modelMapper.map(dto, Organization.class);
-        newEntity.getGroup().forEach(group -> {
+        newEntity.getGroups().forEach(group -> {
             group.setOrganization(newEntity);
         });
         return newEntity;
@@ -62,7 +63,7 @@ public class OrganizationConverter  implements Converter<Organization, Organizat
     public List<Organization> convertToEntity(List<OrganizationDTO> dtos) {
         List<Organization> organizations = modelMapper.map(dtos, new TypeToken<List<Organization>>(){}.getType());
         organizations.forEach(organization -> {
-        	organization.getGroup().forEach(group -> {
+            organization.getGroups().forEach(group -> {
                 group.setOrganization(organization);
             });
         });
