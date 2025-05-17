@@ -44,7 +44,7 @@ public class MarathonsResource {
 		return ResponseEntity.ok(marathonService.getAll());
 	}
 	
-	@GetMapping("/id")
+	@GetMapping("/{id}")
 	@Operation (
 			description = "Get a marathons and members by group ID",
             responses = {

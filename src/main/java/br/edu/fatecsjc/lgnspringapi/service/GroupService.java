@@ -6,6 +6,7 @@ import br.edu.fatecsjc.lgnspringapi.entity.Group;
 import br.edu.fatecsjc.lgnspringapi.entity.Member;
 import br.edu.fatecsjc.lgnspringapi.repository.GroupRepository;
 import br.edu.fatecsjc.lgnspringapi.repository.MemberRepository;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,7 +30,9 @@ public class GroupService {
     }
 
     public GroupDTO findById(Long id) {
-        return groupConverter.convertToDto(groupRepository.findById(id).get());
+        Group group = groupRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Group not found with id " + id));
+        return groupConverter.convertToDto(group);
     }
 
     @Transactional
