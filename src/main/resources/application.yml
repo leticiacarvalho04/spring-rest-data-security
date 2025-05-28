@@ -18,12 +18,12 @@ spring:
   jpa:
     show-sql: true
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
     properties:
       hibernate:
         format_sql: true
     database: mysql
-    database-platform:
+    database-platform: 
   flyway:
     enabled: true
   devtools:
@@ -34,6 +34,8 @@ spring:
       additional-paths:
         - src/main/java/
         - src/main/resources
+  security:
+    enabled: true
 
 application:
   security:

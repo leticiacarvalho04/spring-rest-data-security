@@ -21,10 +21,10 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.annotation.security.RolesAllowed;
 
 @RestController
 @RequestMapping("/marathons")
-@PreAuthorize("hasRole('ADMIN')")
 @Tag(name = "Marathons and Members")
 @SecurityRequirement(name = "bearerAuth")
 public class MarathonsResource {
@@ -87,17 +87,18 @@ public class MarathonsResource {
 				.body(marathonService.save(body));
 	}
 	
-	@DeleteMapping ("/{id}")
-    @Operation(
-            description = "Delete a group and members by group ID",
-            responses = {
-                    @ApiResponse(description = "Success", responseCode = "204"),
-                    @ApiResponse(description = "Unauthorized/Invalid token", responseCode = "403"),
-                    @ApiResponse(description = "Unknown error", responseCode = "400"),
-            }
-    )
-	public ResponseEntity<Void> update(@PathVariable Long id){
-		marathonService.delete(id);
-		return ResponseEntity.noContent().build();
+	@DeleteMapping("/{id}")
+	@PreAuthorize("hasAuthority('admin:delete')")
+	@Operation(
+	        description = "Delete a group and members by group ID",
+	        responses = {
+	                @ApiResponse(description = "Success", responseCode = "204"),
+	                @ApiResponse(description = "Unauthorized/Invalid token", responseCode = "403"),
+	                @ApiResponse(description = "Unknown error", responseCode = "400"),
+	        }
+	)
+	public ResponseEntity<Void> delete(@PathVariable Long id) {
+	    marathonService.delete(id);
+	    return ResponseEntity.noContent().build();
 	}
 }
