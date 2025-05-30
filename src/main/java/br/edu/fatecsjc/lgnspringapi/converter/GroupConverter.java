@@ -18,6 +18,10 @@ public class GroupConverter implements Converter<Group, GroupDTO> {
     private ModelMapper modelMapper;
 
     private TypeMap<GroupDTO, Group> propertyMapperDto;
+    
+    public GroupConverter(ModelMapper modelMapper) {
+        this.modelMapper = modelMapper;
+    }
 
     @Override
     public Group convertToEntity(GroupDTO dto) {
