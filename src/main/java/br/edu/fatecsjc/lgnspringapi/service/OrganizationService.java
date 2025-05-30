@@ -39,7 +39,7 @@ public class OrganizationService {
         Organization entity = organizationRepository.findById(id).orElse(null);
 
         if (entity != null) {
-            groupRepository.deleteGroupByOrganization(entity);
+            groupRepository.deleteAllByOrganization(entity);
             entity.getGroups().clear();
 
             Organization organizationToSaved = organizationConverter.convertToEntity(dto, entity);

@@ -8,5 +8,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface GroupRepository extends JpaRepository<Group, Long> {
-	void deleteGroupByOrganization(Organization organization);
+	void deleteAllByOrganization(Organization organization);
 }

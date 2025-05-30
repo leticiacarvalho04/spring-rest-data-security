@@ -4,7 +4,9 @@ import br.edu.fatecsjc.lgnspringapi.entity.Token;
 import br.edu.fatecsjc.lgnspringapi.repository.TokenRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -20,9 +22,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Optional;
 
-@SpringBootTest
-@AutoConfigureMockMvc
-@RequiredArgsConstructor
+@ExtendWith(MockitoExtension.class)
 class LogoutServiceTest {
 
     @InjectMocks
@@ -40,38 +40,22 @@ class LogoutServiceTest {
     @Mock
     private Authentication authentication;
 
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-    }
-
     @Test
     void testLogout_InvalidHeader_DoesNothing() {
-        // Arrange
         when(request.getHeader("Authorization")).thenReturn(null);
-
-        // Act
         logoutService.logout(request, response, authentication);
-
-        // Assert
         verify(tokenRepository, never()).findByToken(anyString());
     }
 
     @Test
     void testLogout_MissingBearerPrefix_DoesNothing() {
-        // Arrange
         when(request.getHeader("Authorization")).thenReturn("InvalidToken");
-
-        // Act
         logoutService.logout(request, response, authentication);
-
-        // Assert
         verify(tokenRepository, never()).findByToken(anyString());
     }
 
     @Test
     void testLogout_ValidToken_RevokesAndExpiresToken() {
-        // Arrange
         String jwt = "valid.jwt.token";
         Token token = new Token();
         token.setToken(jwt);
@@ -81,10 +65,8 @@ class LogoutServiceTest {
         when(request.getHeader("Authorization")).thenReturn("Bearer " + jwt);
         when(tokenRepository.findByToken(jwt)).thenReturn(Optional.of(token));
 
-        // Act
         logoutService.logout(request, response, authentication);
 
-        // Assert
         verify(tokenRepository, times(1)).save(token);
         assertTrue(token.isExpired());
         assertTrue(token.isRevoked());
@@ -92,15 +74,12 @@ class LogoutServiceTest {
 
     @Test
     void testLogout_TokenNotFound_DoesNothing() {
-        // Arrange
         String jwt = "unknown.jwt.token";
         when(request.getHeader("Authorization")).thenReturn("Bearer " + jwt);
         when(tokenRepository.findByToken(jwt)).thenReturn(Optional.empty());
 
-        // Act
         logoutService.logout(request, response, authentication);
 
-        // Assert
         verify(tokenRepository, times(1)).findByToken(jwt);
         verify(tokenRepository, never()).save(any(Token.class));
     }

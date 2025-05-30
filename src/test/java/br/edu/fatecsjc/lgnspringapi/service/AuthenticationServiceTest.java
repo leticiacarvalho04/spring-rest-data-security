@@ -1,34 +1,40 @@
 package br.edu.fatecsjc.lgnspringapi.service;
 
-import br.edu.fatecsjc.lgnspringapi.enums.Role;
 import br.edu.fatecsjc.lgnspringapi.dto.AuthenticationRequestDTO;
 import br.edu.fatecsjc.lgnspringapi.dto.AuthenticationResponseDTO;
 import br.edu.fatecsjc.lgnspringapi.dto.RegisterRequestDTO;
+import br.edu.fatecsjc.lgnspringapi.enums.Role;
+import br.edu.fatecsjc.lgnspringapi.entity.Token;
 import br.edu.fatecsjc.lgnspringapi.entity.User;
 import br.edu.fatecsjc.lgnspringapi.repository.TokenRepository;
 import br.edu.fatecsjc.lgnspringapi.repository.UserRepository;
+import io.jsonwebtoken.io.IOException;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import jakarta.servlet.ServletOutputStream;
+import jakarta.servlet.WriteListener;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.springframework.http.HttpHeaders;
-import org.springframework.mock.web.MockHttpServletResponse;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.*;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.boot.test.context.SpringBootTest;
 
-import java.io.IOException;
-import java.util.ArrayList;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.Collections;
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@SpringBootTest
+@ExtendWith(MockitoExtension.class)
 class AuthenticationServiceTest {
 
     @Mock
@@ -49,109 +55,120 @@ class AuthenticationServiceTest {
     @InjectMocks
     private AuthenticationService authenticationService;
 
+    private User user;
+
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
+        user = User.builder()
+                .id(1L)
+                .firstName("Test")
+                .lastName("User")
+                .email("test@mail.com")
+                .password("encodedPassword")
+                .role(Role.USER)
+                .build();
     }
 
     @Test
     void shouldRegisterUser() {
-        // Arrange
-        RegisterRequestDTO request = new RegisterRequestDTO();
-        request.setFirstname("Test");
-        request.setLastname("User");
-        request.setEmail("test@mail.com");
-        request.setPassword("123");
-        request.setRole(Role.USER);
+        RegisterRequestDTO request = new RegisterRequestDTO(
+                "Test", "User", "test@mail.com", "password", Role.USER
+        );
 
-        User savedUser = User.builder()
-                .id(1L)
-                .firstName("Test")
-                .lastName("User")
-                .email("test@mail.com")
-                .password("encoded")
-                .role(Role.USER)
-                .build();
-
-        when(passwordEncoder.encode(anyString())).thenReturn("encoded");
-        when(userRepository.save(any(User.class))).thenReturn(savedUser);
+        when(userRepository.save(any(User.class))).thenReturn(user);
+        when(passwordEncoder.encode(anyString())).thenReturn("encodedPassword");
         when(jwtService.generateToken(any(User.class))).thenReturn("token");
-        when(jwtService.generateRefreshToken(any(User.class))).thenReturn("refresh");
-        when(tokenRepository.save(any())).thenReturn(null);
+        when(jwtService.generateRefreshToken(any(User.class))).thenReturn("refreshToken");
 
-        // Act
         AuthenticationResponseDTO response = authenticationService.register(request);
 
-        // Assert
-        assertThat(response).isNotNull();
-        assertThat(response.getAccessToken()).isEqualTo("token");
-        assertThat(response.getRefreshToken()).isEqualTo("refresh");
+        assertNotNull(response);
+        assertEquals("token", response.getAccessToken());
+        assertEquals("refreshToken", response.getRefreshToken());
+
+        verify(userRepository).save(any(User.class));
+        verify(tokenRepository).save(any(Token.class));
     }
 
     @Test
     void shouldAuthenticateUser() {
-        // Arrange
-        AuthenticationRequestDTO request = new AuthenticationRequestDTO();
-        request.setEmail("test@mail.com");
-        request.setPassword("123");
+        AuthenticationRequestDTO request = new AuthenticationRequestDTO(
+                "test@mail.com", "password"
+        );
 
-        User user = User.builder()
-                .id(1L)
-                .firstName("Test")
-                .lastName("User")
-                .email("test@mail.com")
-                .password("encoded")
-                .role(Role.USER)
-                .build();
+        when(userRepository.findByEmail("test@mail.com")).thenReturn(Optional.of(user));
+        when(jwtService.generateToken(user)).thenReturn("token");
+        when(jwtService.generateRefreshToken(user)).thenReturn("refreshToken");
 
-        when(authenticationManager.authenticate(any())).thenReturn(null);
-        when(userRepository.findByEmail("test@mail.com"))
-                .thenReturn(Optional.of(user));
-        when(jwtService.generateToken(any(User.class))).thenReturn("token");
-        when(jwtService.generateRefreshToken(any(User.class))).thenReturn("refresh");
-        when(tokenRepository.findAllValidTokenByUser(anyLong())).thenReturn(new ArrayList<>());
-        when(tokenRepository.save(any())).thenReturn(null);
+        when(tokenRepository.findAllValidTokenByUser(user.getId()))
+                .thenReturn(Collections.emptyList());
 
-        // Act
         AuthenticationResponseDTO response = authenticationService.authenticate(request);
 
-        // Assert
-        assertThat(response).isNotNull();
-        assertThat(response.getAccessToken()).isEqualTo("token");
-        assertThat(response.getRefreshToken()).isEqualTo("refresh");
+        assertNotNull(response);
+        assertEquals("token", response.getAccessToken());
+        assertEquals("refreshToken", response.getRefreshToken());
+
+        verify(authenticationManager).authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        "test@mail.com",
+                        "password"
+                )
+        );
+
+        verify(tokenRepository).save(any(Token.class));
     }
 
     @Test
-    void shouldRefreshToken() throws IOException {
-        // Arrange
+    void shouldRefreshToken() throws Exception {
+        String refreshToken = "refreshToken";
+        String newAccessToken = "newAccessToken";
+
         HttpServletRequest request = mock(HttpServletRequest.class);
-        MockHttpServletResponse response = new MockHttpServletResponse();
+        HttpServletResponse response = mock(HttpServletResponse.class);
 
-        User user = User.builder()
-                .id(1L)
-                .firstName("Test")
-                .lastName("User")
-                .email("test@mail.com")
-                .password("encoded")
-                .role(Role.USER)
-                .build();
+        ServletOutputStream outputStream = new ServletOutputStream() {
+            private ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
-        when(request.getHeader(HttpHeaders.AUTHORIZATION)).thenReturn("Bearer refreshToken");
-        when(jwtService.extractUsername("refreshToken")).thenReturn("test@mail.com");
+            @Override
+            public boolean isReady() {
+                return true;
+            }
+
+            @Override
+            public void setWriteListener(WriteListener writeListener) {}
+
+            @Override
+            public void write(int b) throws IOException {
+                baos.write(b);
+            }
+
+            @Override
+            public String toString() {
+                return baos.toString();
+            }
+        };
+
+        when(request.getHeader("Authorization")).thenReturn("Bearer " + refreshToken);
+        when(jwtService.extractUsername(refreshToken)).thenReturn("test@mail.com");
         when(userRepository.findByEmail("test@mail.com")).thenReturn(Optional.of(user));
-        when(jwtService.isTokenValid("refreshToken", user)).thenReturn(true);
-        when(jwtService.generateToken(user)).thenReturn("newAccessToken");
-        when(jwtService.generateRefreshToken(user)).thenReturn("refreshToken");
-        when(tokenRepository.findAllValidTokenByUser(anyLong())).thenReturn(new ArrayList<>());
-        when(tokenRepository.save(any())).thenReturn(null);
+        when(jwtService.isTokenValid(refreshToken, user)).thenReturn(true);
+        when(jwtService.generateToken(user)).thenReturn(newAccessToken);
 
-        // Act
+        when(tokenRepository.findAllValidTokenByUser(user.getId()))
+                .thenReturn(Collections.emptyList());
+
+        when(response.getOutputStream()).thenReturn(outputStream);
+
         authenticationService.refreshToken(request, response);
 
-        // Assert
-        verify(userRepository, times(1)).findByEmail("test@mail.com");
-        verify(jwtService, times(1)).extractUsername("refreshToken");
-        verify(jwtService, times(1)).isTokenValid("refreshToken", user);
-        verify(jwtService, times(1)).generateToken(user);
+        String jsonResponse = outputStream.toString();
+
+        assertTrue(jsonResponse.contains("accessToken"));
+        assertTrue(jsonResponse.contains("refreshToken"));
+        assertTrue(jsonResponse.contains(newAccessToken));
+        assertTrue(jsonResponse.contains(refreshToken));
+
+        verify(tokenRepository).save(any(Token.class));
     }
 }

@@ -1,30 +1,25 @@
 package br.edu.fatecsjc.lgnspringapi.service;
 
+import br.edu.fatecsjc.lgnspringapi.dto.ChangePasswordRequestDTO;
+import br.edu.fatecsjc.lgnspringapi.entity.User;
+import br.edu.fatecsjc.lgnspringapi.exception.InvalidCurrentPasswordException;
+import br.edu.fatecsjc.lgnspringapi.exception.PasswordsDoNotMatchException;
+import br.edu.fatecsjc.lgnspringapi.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.test.context.ActiveProfiles;
-
-import br.edu.fatecsjc.lgnspringapi.dto.ChangePasswordRequestDTO;
-import br.edu.fatecsjc.lgnspringapi.repository.UserRepository;
 
 import java.util.Collections;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@SpringBootTest
-@AutoConfigureMockMvc
 class UserServiceTest {
 
     @InjectMocks
@@ -42,7 +37,7 @@ class UserServiceTest {
     }
 
     @Test
-    void whenCurrentPasswordIsWrong_thenThrowsException() {
+    void whenCurrentPasswordIsWrong_thenThrowsInvalidCurrentPasswordException() {
         // Arrange
         ChangePasswordRequestDTO request = ChangePasswordRequestDTO.builder()
                 .currentPassword("wrong_password")
@@ -50,25 +45,24 @@ class UserServiceTest {
                 .confirmationPassword("newPass123")
                 .build();
 
-        br.edu.fatecsjc.lgnspringapi.entity.User user = new br.edu.fatecsjc.lgnspringapi.entity.User();
+        User user = new User();
         user.setPassword("encoded_correct_password");
 
         Authentication authentication = new UsernamePasswordAuthenticationToken(
                 user, null, Collections.emptyList()
         );
 
-        // Simula senha atual incorreta
         when(passwordEncoder.matches("wrong_password", user.getPassword()))
                 .thenReturn(false);
 
         // Act & Assert
-        assertThatExceptionOfType(IllegalStateException.class)
+        assertThatExceptionOfType(InvalidCurrentPasswordException.class)
                 .isThrownBy(() -> userService.changePassword(request, authentication))
                 .withMessage("Wrong password");
     }
 
     @Test
-    void whenNewPasswordsDoNotMatch_thenThrowsException() {
+    void whenNewPasswordsDoNotMatch_thenThrowsPasswordsDoNotMatchException() {
         // Arrange
         ChangePasswordRequestDTO request = ChangePasswordRequestDTO.builder()
                 .currentPassword("correct_password")
@@ -76,23 +70,22 @@ class UserServiceTest {
                 .confirmationPassword("differentPass123")
                 .build();
 
-        br.edu.fatecsjc.lgnspringapi.entity.User user = new br.edu.fatecsjc.lgnspringapi.entity.User();
+        User user = new User();
         user.setPassword("encoded_correct_password");
 
         Authentication authentication = new UsernamePasswordAuthenticationToken(
                 user, null, Collections.emptyList()
         );
 
-        // Simula senha atual correta
         when(passwordEncoder.matches("correct_password", user.getPassword()))
                 .thenReturn(true);
 
         // Act & Assert
-        assertThatExceptionOfType(IllegalStateException.class)
+        assertThatExceptionOfType(PasswordsDoNotMatchException.class)
                 .isThrownBy(() -> userService.changePassword(request, authentication))
-                .withMessage("Wrong password");
+                .withMessage("Passwords do not match");
 
-        verify(userRepository, never()).save(any(br.edu.fatecsjc.lgnspringapi.entity.User.class));
+        verify(userRepository, never()).save(any(User.class));
     }
 
     @Test
@@ -104,7 +97,7 @@ class UserServiceTest {
                 .confirmationPassword("newPass123")
                 .build();
 
-        br.edu.fatecsjc.lgnspringapi.entity.User user = new br.edu.fatecsjc.lgnspringapi.entity.User();
+        User user = new User();
         user.setEmail("test@example.com");
         user.setPassword("encoded_correct_password");
 
