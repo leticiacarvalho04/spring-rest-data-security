@@ -18,6 +18,11 @@ public class MemberConverter implements Converter<Member, MemberDTO> {
     private ModelMapper modelMapper;
 
     private TypeMap<MemberDTO, Member> propertyMapperDto;
+    
+    @Autowired
+    public MemberConverter(ModelMapper modelMapper) {
+        this.modelMapper = modelMapper;
+    }
 
     @Override
     public Member convertToEntity(MemberDTO dto) {
