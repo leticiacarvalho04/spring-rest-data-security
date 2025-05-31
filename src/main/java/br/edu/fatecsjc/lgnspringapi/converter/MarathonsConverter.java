@@ -19,6 +19,10 @@ public class MarathonsConverter implements Converter<Marathons, MarathonsDTO> {
     private ModelMapper modelMapper;
 
     private TypeMap<MarathonsDTO, Marathons> propertyMapperDto;
+    
+    public MarathonsConverter(ModelMapper modelMapper) {
+        this.modelMapper = modelMapper;
+    }
 
     @Override
     public Marathons convertToEntity(MarathonsDTO dto) {
