@@ -4,8 +4,6 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
-import br.edu.fatecsjc.lgnspringapi.entity.Member;
-import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
 @Data

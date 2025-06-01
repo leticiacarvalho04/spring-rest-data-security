@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.ActiveProfiles;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -23,7 +22,6 @@ class RootResourceTest {
     void setUp() {
         rootResource = new RootResource();
         
-        // Usando reflection para injetar o valor da porta (já que não temos injeção automática no teste unitário direto)
         try {
             var field = RootResource.class.getDeclaredField("port");
             field.setAccessible(true);

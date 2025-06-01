@@ -9,19 +9,13 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.security.Key;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.crypto.SecretKey;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
@@ -36,9 +30,9 @@ class JwtServiceTest {
     @Mock
     private UserDetails userDetails;
 
-    private final String secretKey = "404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970"; // >= 256 bits
-    private final long jwtExpiration = 3600000; // 1 hora
-    private final long refreshExpiration = 7200000; // 2 horas
+    private final String secretKey = "404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970"; 
+    private final long jwtExpiration = 3600000;
+    private final long refreshExpiration = 7200000;
 
     @BeforeEach
     void setUp() {

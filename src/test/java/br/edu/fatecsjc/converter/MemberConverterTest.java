@@ -8,13 +8,10 @@ import org.modelmapper.ModelMapper;
 import br.edu.fatecsjc.lgnspringapi.converter.MemberConverter;
 import br.edu.fatecsjc.lgnspringapi.dto.MarathonsDTO;
 import br.edu.fatecsjc.lgnspringapi.dto.MemberDTO;
-import br.edu.fatecsjc.lgnspringapi.entity.Group;
-import br.edu.fatecsjc.lgnspringapi.entity.Marathons;
 import br.edu.fatecsjc.lgnspringapi.entity.Member;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.ArrayList;
 
 public class MemberConverterTest {
 

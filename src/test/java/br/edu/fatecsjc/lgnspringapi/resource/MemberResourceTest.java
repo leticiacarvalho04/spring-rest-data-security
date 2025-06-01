@@ -1,20 +1,14 @@
 package br.edu.fatecsjc.lgnspringapi.resource;
 
-import br.edu.fatecsjc.lgnspringapi.config.JwtAuthenticationFilter;
-import br.edu.fatecsjc.lgnspringapi.config.SecurityConfig;
-import br.edu.fatecsjc.lgnspringapi.config.TestSecurityConfig;
 import br.edu.fatecsjc.lgnspringapi.dto.MemberDTO;
 import br.edu.fatecsjc.lgnspringapi.service.MemberService;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -29,7 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@WithMockUser(roles = {"ADMIN"}) // Valido pra todos os testes
+@WithMockUser(roles = {"ADMIN"})
 class MemberResourceTest {
 
     @Autowired

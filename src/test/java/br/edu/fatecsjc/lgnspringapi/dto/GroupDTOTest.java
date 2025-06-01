@@ -6,7 +6,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 
 import java.util.List;
 
@@ -22,7 +21,6 @@ class GroupDTOTest {
 
     @BeforeEach
     void setUp() {
-        // Configura DTOs auxiliares
         memberDTO = MemberDTO.builder()
                 .id(1L)
                 .name("John Doe")
@@ -33,7 +31,6 @@ class GroupDTOTest {
                 .name("Tech Corp")
                 .build();
 
-        // Configura grupoDTO
         groupDTO = new GroupDTO();
         groupDTO.setId(1L);
         groupDTO.setName("Developers");

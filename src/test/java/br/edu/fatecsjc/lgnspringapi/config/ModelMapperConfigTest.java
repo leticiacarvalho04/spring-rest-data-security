@@ -11,7 +11,6 @@ import org.modelmapper.config.Configuration;
 import org.modelmapper.convention.NamingConventions;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -27,13 +26,10 @@ public class ModelMapperConfigTest {
 
     @Test
     void testModelMapperConfiguration() {
-        // Act
         ModelMapper modelMapper = modelMapperConfig.modelMapper();
 
-        // Assert
         assertNotNull(modelMapper);
 
-        // Verifica configurações
         assertTrue(modelMapper.getConfiguration().isFieldMatchingEnabled());
         assertEquals(Configuration.AccessLevel.PRIVATE, modelMapper.getConfiguration().getFieldAccessLevel());
         assertEquals(NamingConventions.JAVABEANS_MUTATOR, modelMapper.getConfiguration().getSourceNamingConvention());

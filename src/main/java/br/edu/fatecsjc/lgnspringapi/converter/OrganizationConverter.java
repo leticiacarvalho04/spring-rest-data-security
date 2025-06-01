@@ -19,6 +19,10 @@ public class OrganizationConverter  implements Converter<Organization, Organizat
     private ModelMapper modelMapper;
 
     private TypeMap<OrganizationDTO, Organization> propertyMapperDto;
+    
+    public void setModelMapper(ModelMapper modelMapper) {
+        this.modelMapper = modelMapper;
+    }
 
     @Override
     public Organization convertToEntity(OrganizationDTO dto) {
@@ -74,4 +78,5 @@ public class OrganizationConverter  implements Converter<Organization, Organizat
     public List<OrganizationDTO> convertToDto(List<Organization> entities) {
         return modelMapper.map(entities, new TypeToken<List<OrganizationDTO>>(){}.getType());
     }
+
 }

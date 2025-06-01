@@ -5,7 +5,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -18,12 +17,10 @@ class TokenTest {
 
     @BeforeEach
     void setUp() {
-        // Configura usuário
         user = new User();
         user.setId(1L);
         user.setEmail("test@example.com");
 
-        // Configura token
         token = new Token();
         token.setId(1L);
         token.setToken("valid-jwt-token");

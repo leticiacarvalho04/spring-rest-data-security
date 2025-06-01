@@ -16,13 +16,6 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 
-import static br.edu.fatecsjc.lgnspringapi.enums.Permission.ADMIN_CREATE;
-import static br.edu.fatecsjc.lgnspringapi.enums.Permission.ADMIN_UPDATE;
-import static br.edu.fatecsjc.lgnspringapi.enums.Role.ADMIN;
-import static org.springframework.http.HttpMethod.POST;
-import static org.springframework.http.HttpMethod.PUT;
-import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
-
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor

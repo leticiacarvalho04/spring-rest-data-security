@@ -4,7 +4,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 
 import java.util.List;
 
@@ -20,13 +19,11 @@ class MarathonsDTOTest {
 
     @BeforeEach
     void setUp() {
-        // Configura DTO auxiliar
         memberDTO = MemberDTO.builder()
                 .id(1L)
                 .name("John Doe")
                 .build();
 
-        // Configura marathonDTO
         marathonDTO = new MarathonsDTO();
         marathonDTO.setId(1L);
         marathonDTO.setIdentification("Spring Run");
