@@ -7,6 +7,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -145,5 +146,91 @@ class UserTest {
         assertThat(emptyUser.getPassword()).isNull();
         assertThat(emptyUser.getRole()).isNull();
         assertThat(emptyUser.getTokens()).isNull();
+    }
+    
+    @Test
+    void shouldHandleNullRoleInAuthorities() {
+        User userWithNullRole = User.builder()
+                .id(99L)
+                .email("nullrole@example.com")
+                .password("pass")
+                .role(null) 
+                .build();
+
+        Collection<? extends GrantedAuthority> authorities = userWithNullRole.getAuthorities();
+
+        assertThat(authorities).isEmpty();
+    }
+    
+    @Test
+    void shouldHandleNullAndEmptyTokens() {
+        User userWithNullTokens = User.builder()
+                .id(100L)
+                .email("nulltokens@example.com")
+                .password("pass")
+                .role(Role.USER)
+                .tokens(null)
+                .build();
+
+        assertThat(userWithNullTokens.getTokens()).isNull();
+
+        User userWithEmptyTokens = User.builder()
+                .id(101L)
+                .email("emptytokens@example.com")
+                .password("pass")
+                .role(Role.USER)
+                .tokens(List.of())
+                .build();
+
+        assertThat(userWithEmptyTokens.getTokens()).isEmpty();
+    }
+
+    @Test
+    void shouldTestEqualsWithAllNullFields() {
+        User user1 = new User();
+        User user2 = new User();
+
+        assertThat(user1).isEqualTo(user2);
+        assertThat(user1.hashCode()).isEqualTo(user2.hashCode());
+    }
+
+    @Test
+    void shouldHandleNullNamesAndEmail() {
+        User userNull = User.builder()
+                .id(200L)
+                .firstName(null)
+                .lastName(null)
+                .email(null)
+                .password("pass")
+                .role(Role.USER)
+                .build();
+
+        assertThat(userNull.getFirstName()).isNull();
+        assertThat(userNull.getLastName()).isNull();
+        assertThat(userNull.getEmail()).isNull();
+    }
+
+    @Test
+    void shouldHandleNullEmailInUsername() {
+        User userWithNullEmail = User.builder()
+                .id(300L)
+                .email(null)
+                .password("pass")
+                .role(Role.USER)
+                .build();
+
+        assertThat(userWithNullEmail.getUsername()).isNull();
+    }
+
+    @Test
+    void shouldHandleNullPassword() {
+        User userWithNullPassword = User.builder()
+                .id(400L)
+                .email("nullpassword@example.com")
+                .password(null)
+                .role(Role.USER)
+                .build();
+
+        assertThat(userWithNullPassword.getPassword()).isNull();
     }
 }
