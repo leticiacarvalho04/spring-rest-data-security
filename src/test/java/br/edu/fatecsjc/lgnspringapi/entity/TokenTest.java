@@ -1,8 +1,9 @@
 package br.edu.fatecsjc.lgnspringapi.entity;
 
-import br.edu.fatecsjc.lgnspringapi.enums.TokenType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import br.edu.fatecsjc.lgnspringapi.enums.TokenType;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -114,4 +115,91 @@ class TokenTest {
         assertThat(token1).isNotEqualTo(token3);
         assertThat(token1.hashCode()).isNotEqualTo(token3.hashCode());
     }
+    
+    @Test
+    void shouldHaveDefaultValuesWhenUsingNoArgsConstructor() {
+        Token emptyToken = new Token();
+
+        assertThat(emptyToken.getId()).isNull();
+        assertThat(emptyToken.getToken()).isNull();
+        assertThat(emptyToken.getTokenType()).isEqualTo(TokenType.BEARER); 
+        assertThat(emptyToken.isRevoked()).isFalse();
+        assertThat(emptyToken.isExpired()).isFalse();
+        assertThat(emptyToken.getUser()).isNull();
+    }
+    
+    @Test
+    void shouldHandleEqualsWithDifferentObjects() {
+        Token token1 = new Token(7L, "token-789", TokenType.BEARER, false, false, user);
+
+        assertThat(token1.equals(null)).isFalse();
+        assertThat(token1.equals("NotAToken")).isFalse();
+        assertThat(token1.equals(token1)).isTrue();
+    }
+    
+    @Test
+    void shouldHandleHashCodeWithNullFields() {
+        Token token1 = new Token();
+        Token token2 = new Token();
+
+        assertThat(token1.hashCode()).isEqualTo(token2.hashCode());
+    }
+
+    @Test
+    void shouldRespectEqualsReflexive() {
+        Token token = new Token(8L, "token-888", TokenType.BEARER, false, false, user);
+        assertThat(token.equals(token)).isTrue();
+    }
+
+    @Test
+    void shouldRespectEqualsSymmetric() {
+        Token token1 = new Token(9L, "token-999", TokenType.BEARER, false, false, user);
+        Token token2 = new Token(9L, "token-999", TokenType.BEARER, false, false, user);
+
+        assertThat(token1.equals(token2)).isTrue();
+        assertThat(token2.equals(token1)).isTrue();
+    }
+
+    @Test
+    void shouldRespectEqualsTransitive() {
+        Token token1 = new Token(10L, "token-aaa", TokenType.BEARER, false, false, user);
+        Token token2 = new Token(10L, "token-aaa", TokenType.BEARER, false, false, user);
+        Token token3 = new Token(10L, "token-aaa", TokenType.BEARER, false, false, user);
+
+        assertThat(token1.equals(token2)).isTrue();
+        assertThat(token2.equals(token3)).isTrue();
+        assertThat(token1.equals(token3)).isTrue();
+    }
+
+    @Test
+    void shouldReturnFalseWhenComparingDifferentTokens() {
+        Token token1 = new Token(11L, "token-bbb", TokenType.BEARER, false, false, user);
+        Token token2 = new Token(12L, "token-ccc", TokenType.BEARER, true, true, null);
+
+        assertThat(token1.equals(token2)).isFalse();
+    }
+
+    @Test
+    void shouldSetAllFieldsToNullAndCheck() {
+        token.setId(null);
+        token.setToken(null);
+        token.setTokenType(null);
+        token.setRevoked(false);
+        token.setExpired(false);
+        token.setUser(null);
+
+        assertThat(token.getId()).isNull();
+        assertThat(token.getToken()).isNull();
+        assertThat(token.getTokenType()).isNull();
+        assertThat(token.isRevoked()).isFalse();
+        assertThat(token.isExpired()).isFalse();
+        assertThat(token.getUser()).isNull();
+    }
+
+    @Test
+    void shouldHandleLazyUserWhenNull() {
+        Token lazyToken = new Token();
+        assertThat(lazyToken.getUser()).isNull();
+    }
+
 }
