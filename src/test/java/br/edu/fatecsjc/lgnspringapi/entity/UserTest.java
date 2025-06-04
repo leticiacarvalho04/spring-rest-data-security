@@ -1,9 +1,8 @@
 package br.edu.fatecsjc.lgnspringapi.entity;
 
 import br.edu.fatecsjc.lgnspringapi.enums.Role;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -12,29 +11,30 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest
-@AutoConfigureMockMvc
 class UserTest {
 
+    private User user;
+    private Token token1;
+    private Token token2;
+
+    @BeforeEach
+    void setUp() {
+        token1 = Token.builder().id(1L).token("abc123").build();
+        token2 = Token.builder().id(2L).token("def456").build();
+
+        user = User.builder()
+                .id(1L)
+                .firstName("João")
+                .lastName("Silva")
+                .email("joao@example.com")
+                .password("encoded_password")
+                .role(Role.USER)
+                .tokens(List.of(token1, token2))
+                .build();
+    }
+
     @Test
-    void testAllArgsConstructorAndGetters() {
-        // Arrange
-        Token token1 = Token.builder().id(1L).token("abc123").build();
-        Token token2 = Token.builder().id(2L).token("def456").build();
-
-        List<Token> tokens = List.of(token1, token2);
-
-        User user = new User(
-                1L,
-                "João",
-                "Silva",
-                "joao@example.com",
-                "encoded_password",
-                Role.USER,
-                tokens
-        );
-
-        // Assert
+    void shouldTestAllFieldsWithBuilder() {
         assertThat(user.getId()).isEqualTo(1L);
         assertThat(user.getFirstName()).isEqualTo("João");
         assertThat(user.getLastName()).isEqualTo("Silva");
@@ -45,97 +45,105 @@ class UserTest {
     }
 
     @Test
-    void testNoArgsConstructorAndSetters() {
-        // Arrange
-        User user = new User();
+    void shouldTestSettersAndNoArgsConstructor() {
+        User emptyUser = new User();
 
-        Token token = Token.builder().id(3L).token("ghi789").build();
+        emptyUser.setId(2L);
+        emptyUser.setFirstName("Maria");
+        emptyUser.setLastName("Oliveira");
+        emptyUser.setEmail("maria@example.com");
+        emptyUser.setPassword("password123");
+        emptyUser.setRole(Role.ADMIN);
+        emptyUser.setTokens(List.of(token1));
 
-        // Act
-        user.setId(2L);
-        user.setFirstName("Maria");
-        user.setLastName("Oliveira");
-        user.setEmail("maria@example.com");
-        user.setPassword("pass123");
-        user.setRole(Role.ADMIN);
-        user.setTokens(List.of(token));
-
-        // Assert
-        assertThat(user.getId()).isEqualTo(2L);
-        assertThat(user.getFirstName()).isEqualTo("Maria");
-        assertThat(user.getLastName()).isEqualTo("Oliveira");
-        assertThat(user.getEmail()).isEqualTo("maria@example.com");
-        assertThat(user.getPassword()).isEqualTo("pass123");
-        assertThat(user.getRole()).isEqualTo(Role.ADMIN);
-        assertThat(user.getTokens()).containsExactly(token);
+        assertThat(emptyUser.getId()).isEqualTo(2L);
+        assertThat(emptyUser.getFirstName()).isEqualTo("Maria");
+        assertThat(emptyUser.getLastName()).isEqualTo("Oliveira");
+        assertThat(emptyUser.getEmail()).isEqualTo("maria@example.com");
+        assertThat(emptyUser.getPassword()).isEqualTo("password123");
+        assertThat(emptyUser.getRole()).isEqualTo(Role.ADMIN);
+        assertThat(emptyUser.getTokens()).containsExactly(token1);
     }
 
     @Test
-    void testBuilder() {
-        // Arrange
-        Token token1 = Token.builder().id(4L).token("jkl012").build();
-        Token token2 = Token.builder().id(5L).token("mno345").build();
-
-        List<Token> tokens = List.of(token1, token2);
-
-        // Act
-        User user = User.builder()
-                .id(3L)
-                .firstName("Carlos")
-                .lastName("Souza")
-                .email("carlos@example.com")
-                .password("pass456")
-                .role(Role.ADMIN)
-                .tokens(tokens)
-                .build();
-
-        // Assert
-        assertThat(user.getId()).isEqualTo(3L);
-        assertThat(user.getFirstName()).isEqualTo("Carlos");
-        assertThat(user.getLastName()).isEqualTo("Souza");
-        assertThat(user.getEmail()).isEqualTo("carlos@example.com");
-        assertThat(user.getPassword()).isEqualTo("pass456");
-        assertThat(user.getRole()).isEqualTo(Role.ADMIN);
-        assertThat(user.getTokens()).containsExactlyInAnyOrder(token1, token2);
-    }
-
-    @Test
-    void testUserDetailsMethods() {
-        User user = new User();
-        user.setEmail("user@example.com");
-        user.setPassword("pass");
-        user.setRole(Role.USER);
-
+    void shouldTestUserDetailsMethods() {
         UserDetails userDetails = user;
 
         Collection<? extends GrantedAuthority> authorities = userDetails.getAuthorities();
 
-        assertThat(authorities).isNotNull();
         assertThat(authorities).extracting("authority")
-                               .containsExactlyInAnyOrder(
-                                   "READ",
-                                   "ROLE_USER"
-                               );
+                .containsExactlyInAnyOrder("ROLE_USER", "READ");
+
+        assertThat(userDetails.getUsername()).isEqualTo("joao@example.com");
+        assertThat(userDetails.getPassword()).isEqualTo("encoded_password");
+        assertThat(userDetails.isAccountNonExpired()).isTrue();
+        assertThat(userDetails.isAccountNonLocked()).isTrue();
+        assertThat(userDetails.isCredentialsNonExpired()).isTrue();
+        assertThat(userDetails.isEnabled()).isTrue();
     }
 
     @Test
-    void testBidirectionalTokenRelationship() {
-        // Arrange
-        User user = User.builder()
-                .id(4L)
-                .email("bidir@example.com")
+    void shouldTestEqualsAndHashCode() {
+        User userCopy = User.builder()
+                .id(1L)
+                .firstName("João")
+                .lastName("Silva")
+                .email("joao@example.com")
+                .password("encoded_password")
+                .role(Role.USER)
+                .tokens(List.of(token1, token2))
                 .build();
 
-        Token token = Token.builder()
-                .id(6L)
-                .token("xyz789")
-                .user(user)
+        User differentUser = User.builder()
+                .id(3L)
+                .email("different@example.com")
                 .build();
 
-        user.setTokens(List.of(token));
+        assertThat(user).isEqualTo(userCopy);
+        assertThat(user.hashCode()).isEqualTo(userCopy.hashCode());
 
-        // Assert
-        assertThat(user.getTokens()).contains(token);
-        assertThat(token.getUser()).isEqualTo(user);
+        assertThat(user).isNotEqualTo(differentUser);
+        assertThat(user.hashCode()).isNotEqualTo(differentUser.hashCode());
+    }
+
+    @Test
+    void shouldTestEqualsAgainstNullAndOtherObjects() {
+        assertThat(user.equals(null)).isFalse();
+        assertThat(user.equals("NotAUser")).isFalse();
+        assertThat(user.equals(user)).isTrue();
+    }
+
+    @Test
+    void shouldTestToString() {
+        String userString = user.toString();
+        assertThat(userString).contains(
+                "João",
+                "Silva",
+                "joao@example.com",
+                "encoded_password",
+                "USER"
+        );
+    }
+
+    @Test
+    void shouldTestTokenBidirectionalRelationship() {
+        token1.setUser(user);
+        user.setTokens(List.of(token1));
+
+        assertThat(user.getTokens()).containsExactly(token1);
+        assertThat(token1.getUser()).isEqualTo(user);
+    }
+
+    @Test
+    void shouldHandleNullFieldsGracefully() {
+        User emptyUser = new User();
+
+        assertThat(emptyUser.getId()).isNull();
+        assertThat(emptyUser.getFirstName()).isNull();
+        assertThat(emptyUser.getLastName()).isNull();
+        assertThat(emptyUser.getEmail()).isNull();
+        assertThat(emptyUser.getPassword()).isNull();
+        assertThat(emptyUser.getRole()).isNull();
+        assertThat(emptyUser.getTokens()).isNull();
     }
 }
