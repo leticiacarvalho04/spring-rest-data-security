@@ -9,23 +9,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
 import java.util.List;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.http.MediaType;
+
+import java.util.Collections;
+
 @SpringBootTest
 @AutoConfigureMockMvc
-@Import(TestSecurityConfig.class)
 class MarathonsResourceTest {
 
     @Autowired
@@ -34,26 +33,23 @@ class MarathonsResourceTest {
     @MockBean
     private MarathonsService marathonsService;
 
-    private MarathonsDTO mockMarathon;
-
     @Autowired
-    private WebApplicationContext webApplicationContext;
+    private ObjectMapper objectMapper;
+
+    private MarathonsDTO mockMarathon;
 
     @BeforeEach
     void setup() {
-        mockMvc = MockMvcBuilders
-                .webAppContextSetup(webApplicationContext)
-                .apply(SecurityMockMvcConfigurers.springSecurity())
-                .build();
-
         mockMarathon = MarathonsDTO.builder()
                 .id(1L)
                 .identification("Spring Marathon")
                 .weight(75.0)
                 .score(100)
-                .members(List.of())
+                .members(Collections.emptyList())
                 .build();
     }
+
+    // --- POST /marathons (Register) ---
 
     @Test
     @WithMockUser(authorities = {"admin:create"})
@@ -61,7 +57,7 @@ class MarathonsResourceTest {
         when(marathonsService.save(any())).thenReturn(mockMarathon);
 
         mockMvc.perform(post("/marathons")
-                        .contentType("application/json")
+                        .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
                                   "identification":"Spring Marathon",
@@ -77,6 +73,51 @@ class MarathonsResourceTest {
     }
 
     @Test
+    @WithMockUser(authorities = {"admin:create"})
+    void register_NullRequestBody_ShouldReturn201_BecauseNoValidation() throws Exception {
+        mockMvc.perform(post("/marathons")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isCreated());
+    }
+
+    @Test
+    @WithMockUser(authorities = {"admin:create"})
+    void register_ServiceThrowsException_ShouldReturn400() throws Exception {
+        when(marathonsService.save(any(MarathonsDTO.class)))
+                .thenThrow(new RuntimeException("Erro ao salvar"));
+
+        mockMvc.perform(post("/marathons")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "identification":"Spring Marathon",
+                                  "weight":75.0,
+                                  "score":100,
+                                  "members":[]
+                                }
+                                """))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void register_Unauthorized_ShouldReturn403() throws Exception {
+        mockMvc.perform(post("/marathons")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "identification":"Spring Marathon",
+                                  "weight":75.0,
+                                  "score":100,
+                                  "members":[]
+                                }
+                                """))
+                .andExpect(status().isForbidden());
+    }
+
+    // --- GET /marathons (getAll) ---
+
+    @Test
     @WithMockUser(authorities = {"admin:read"})
     void shouldReturnAllMarathons_whenGetAllMarathonsIsCalled() throws Exception {
         when(marathonsService.getAll()).thenReturn(List.of(mockMarathon));
@@ -89,6 +130,18 @@ class MarathonsResourceTest {
                 .andExpect(jsonPath("$[0].score").value(100))
                 .andExpect(jsonPath("$[0].members").isArray());
     }
+
+    @Test
+    @WithMockUser(authorities = {"admin:read"})
+    void getAll_EmptyListFromService_ShouldReturnEmptyArray() throws Exception {
+        when(marathonsService.getAll()).thenReturn(Collections.emptyList());
+
+        mockMvc.perform(get("/marathons"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.size()").value(0));
+    }
+
+    // --- GET /marathons/{id} (findById) ---
 
     @Test
     @WithMockUser(authorities = {"admin:read"})
@@ -107,6 +160,28 @@ class MarathonsResourceTest {
     }
 
     @Test
+    @WithMockUser(authorities = {"admin:read"})
+    void getMarathonById_ServiceReturnsNull_ShouldReturn200ButEmptyBody() throws Exception {
+        when(marathonsService.findById(anyLong())).thenReturn(null);
+
+        mockMvc.perform(get("/marathons/999"))
+               .andExpect(status().isOk())
+               .andExpect(content().string(""));
+    }
+
+    @Test
+    @WithMockUser(authorities = {"admin:read"})
+    void getMarathonById_ServiceThrowsException_ShouldReturn400() throws Exception {
+        when(marathonsService.findById(anyLong()))
+                .thenThrow(new RuntimeException("Erro ao buscar"));
+
+        mockMvc.perform(get("/marathons/999"))
+                .andExpect(status().isBadRequest());
+    }
+
+    // --- PUT /marathons/{id} (update) ---
+
+    @Test
     @WithMockUser(authorities = {"admin:update"})
     void shouldUpdateMarathon_whenUpdateIsCalledWithValidIdAndData() throws Exception {
         MarathonsDTO updated = MarathonsDTO.builder()
@@ -114,13 +189,13 @@ class MarathonsResourceTest {
                 .identification("Updated Marathon")
                 .weight(80.0)
                 .score(200)
-                .members(List.of())
+                .members(Collections.emptyList())
                 .build();
 
-        when(marathonsService.save(eq(1L), any())).thenReturn(updated);
+        when(marathonsService.save(eq(1L), any(MarathonsDTO.class))).thenReturn(updated);
 
         mockMvc.perform(put("/marathons/1")
-                        .contentType("application/json")
+                        .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
                                   "id":1,
@@ -137,30 +212,81 @@ class MarathonsResourceTest {
     }
 
     @Test
-    @WithMockUser(authorities = {"admin:delete"})
-    void shouldDeleteMarathon_whenDeleteIsCalledWithValidId() throws Exception {
-        doNothing().when(marathonsService).delete(1L);
+    @WithMockUser(authorities = {"admin:update"})
+    void update_EmptyJson_ShouldCallServiceAndReturn201() throws Exception {
+        MarathonsDTO response = MarathonsDTO.builder().build();
+        when(marathonsService.save(eq(1L), any(MarathonsDTO.class))).thenReturn(response);
 
+        mockMvc.perform(put("/marathons/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.name").doesNotExist());
+    }
+
+    @Test
+    @WithMockUser(authorities = {"admin:update"})
+    void update_InvalidId_ShouldReturn400() throws Exception {
+        when(marathonsService.save(eq(-1L), any(MarathonsDTO.class)))
+                .thenThrow(new RuntimeException("ID inválido"));
+
+        mockMvc.perform(put("/marathons/-1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "identification":"Invalid ID",
+                                  "weight":80.0,
+                                  "score":200,
+                                  "members":[]
+                                }
+                                """))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @WithMockUser(authorities = {"admin:update"})
+    void update_ServiceThrowsException_ShouldReturn400() throws Exception {
+        when(marathonsService.save(eq(1L), any(MarathonsDTO.class)))
+                .thenThrow(new RuntimeException("Erro ao atualizar"));
+
+        mockMvc.perform(put("/marathons/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "identification":"Error Update",
+                                  "weight":80.0,
+                                  "score":200,
+                                  "members":[]
+                                }
+                                """))
+                .andExpect(status().isBadRequest());
+    }
+
+    // --- DELETE /marathons/{id} ---
+
+    @Test
+    @WithMockUser(authorities = {"admin:delete"})
+    void deleteGroup_ShouldCallServiceAndReturn204() throws Exception {
         mockMvc.perform(delete("/marathons/1"))
                 .andExpect(status().isNoContent());
 
         verify(marathonsService, times(1)).delete(1L);
     }
-    
+
     @Test
     @WithMockUser(authorities = {"admin:delete"})
-    public void shouldDeleteSuccessfully_whenUserHasDeleteAuthority() throws Exception {
-        mockMvc.perform(delete("/marathons/1"))
-            .andExpect(status().isNoContent());
+    void delete_MissingId_ShouldCallServiceAndReturn204() throws Exception {
+        mockMvc.perform(delete("/marathons/999"))
+                .andExpect(status().isNoContent());
+
+        verify(marathonsService, times(1)).delete(eq(999L));
     }
 
     @Test
-    @WithMockUser(username = "unauthorizedUser", authorities = {"user:read"}) 
-    void shouldReturnForbidden_whenUserDoesNotHaveDeleteAuthority() throws Exception {
-        doNothing().when(marathonsService).delete(1L);
-
+    @WithMockUser(authorities = {"admin:delete"})
+    void delete_ServiceThrowsException_ShouldReturn400() throws Exception {
+        doThrow(new RuntimeException("Erro ao deletar grupo")).when(marathonsService).delete(eq(1L));
         mockMvc.perform(delete("/marathons/1"))
-            .andDo(print()) 
-            .andExpect(status().isForbidden());
+                .andExpect(status().isBadRequest());
     }
 }

@@ -22,6 +22,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+
 import org.springframework.http.HttpStatus;
 
 @RestController
@@ -55,7 +57,7 @@ public class MemberResource {
                     @ApiResponse(description = "Unknown error", responseCode = "400"),
             }
     )
-    public ResponseEntity<MemberDTO> getGroupById(@PathVariable Long id) {
+    public ResponseEntity<MemberDTO> getGroupById(@PathVariable @Valid Long id) {
         return ResponseEntity.ok(memberService.findById(id));
     }
 
@@ -69,7 +71,7 @@ public class MemberResource {
                     @ApiResponse(description = "Unknown error", responseCode = "400"),
             }
     )
-    public ResponseEntity<MemberDTO> update(@PathVariable Long id, @RequestBody MemberDTO body) {
+    public ResponseEntity<MemberDTO> update(@PathVariable @Valid Long id, @RequestBody @Valid MemberDTO body) {
         return ResponseEntity.status(HttpStatusCode.valueOf(201))
                 .body(memberService.save(id, body));
     }
@@ -98,7 +100,7 @@ public class MemberResource {
                     @ApiResponse(description = "Unknown error", responseCode = "400"),
             }
     )
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
+    public ResponseEntity<Void> delete(@PathVariable @Valid Long id) {
         memberService.delete(id);
         return ResponseEntity.noContent().build();
     }
