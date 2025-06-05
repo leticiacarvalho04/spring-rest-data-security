@@ -23,37 +23,40 @@ public class MemberConverterTest {
     }
 
     @Test
-    void testConvertToEntity() {
+    void testConvertToEntityWithExistingEntity() {
         // Arrange
+        Member existingEntity = Member.builder()
+                .id(999L)
+                .name("Existing")
+                .build();
+
         MarathonsDTO marathonDTO = MarathonsDTO.builder()
                 .id(1L)
-                .identification("Marathon 1")
+                .identification("Marathon Existing")
                 .build();
 
         MemberDTO dto = MemberDTO.builder()
-                .id(100L) // Deve ser ignorado no mapeamento
-                .name("John Doe")
-                .groupId(200L)
+                .name("Updated Name")
+                .groupId(300L)
                 .marathons(List.of(marathonDTO))
                 .build();
 
         // Act
-        Member entity = memberConverter.convertToEntity(dto);
+        Member result = memberConverter.convertToEntity(dto, existingEntity);
 
         // Assert
-        assertNotNull(entity);
-        assertNull(entity.getId(), "ID deve ser null, pois é ignorado no mapeamento.");
-        assertEquals("John Doe", entity.getName());
-        assertNotNull(entity.getGroup());
-        assertEquals(200L, entity.getGroup().getId());
+        assertNotNull(result);
+        assertEquals(existingEntity, result);
+        assertEquals("Updated Name", result.getName());
+        assertNotNull(result.getGroup());
+        assertEquals(300L, result.getGroup().getId());
 
-        assertNotNull(entity.getMarathons());
-        assertEquals(1, entity.getMarathons().size());
-        assertEquals("Marathon 1", entity.getMarathons().get(0).getIdentification());
+        assertNotNull(result.getMarathons());
+        assertEquals(1, result.getMarathons().size());
+        assertEquals("Marathon Existing", result.getMarathons().get(0).getIdentification());
 
-        // Verificar relacionamento bidirecional
-        assertNotNull(entity.getMarathons().get(0).getMembers());
-        assertTrue(entity.getMarathons().get(0).getMembers().contains(entity));
+        assertNotNull(result.getMarathons().get(0).getMembers());
+        assertTrue(result.getMarathons().get(0).getMembers().contains(result));
     }
 
     public MemberDTO convertToDto(Member member) {
@@ -120,5 +123,62 @@ public class MemberConverterTest {
         assertNotNull(dtoList);
         assertEquals(2, dtoList.size());
         assertEquals("User A", dtoList.get(0).getName());
+    }
+    
+    @Test
+    void testConvertToDtoWithNull() {
+        MemberDTO dto = memberConverter.convertToDto((Member) null);
+        assertNull(dto);
+    }
+
+    @Test
+    void testConvertToEntityWithNullList() {
+        List<Member> result = memberConverter.convertToEntity((List<MemberDTO>) null);
+        assertNull(result);
+    }
+
+    @Test
+    void testConvertToDtoWithNullList() {
+        List<MemberDTO> result = memberConverter.convertToDto((List<Member>) null);
+        assertNull(result);
+    }
+
+    @Test
+    void testConvertToEntityWithEmptyMarathons() {
+        MemberDTO dto = MemberDTO.builder()
+                .name("No Marathon")
+                .groupId(500L)
+                .marathons(null)
+                .build();
+
+        Member result = memberConverter.convertToEntity(dto);
+
+        assertNotNull(result);
+        assertEquals("No Marathon", result.getName());
+        assertNotNull(result.getGroup());
+        assertEquals(500L, result.getGroup().getId());
+        assertNull(result.getMarathons());
+    }
+
+    @Test
+    void testPropertyMapperCacheBehavior() {
+        MemberDTO dto = MemberDTO.builder()
+                .name("First Call")
+                .groupId(700L)
+                .build();
+
+        Member first = memberConverter.convertToEntity(dto);
+
+        Member second = memberConverter.convertToEntity(dto);
+
+        assertNotNull(first);
+        assertNotNull(second);
+        assertEquals(first.getName(), second.getName());
+    }
+    
+    @Test
+    void shouldReturnNullWhenMappingNull() {
+        MemberDTO dto = memberConverter.convertToDto((Member) null);
+        assertNull(dto);
     }
 }

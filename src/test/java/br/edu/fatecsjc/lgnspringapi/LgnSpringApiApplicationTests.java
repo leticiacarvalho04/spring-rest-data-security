@@ -10,4 +10,10 @@ class LgnSpringApiApplicationTests {
 	void contextLoads() {
 	}
 
+	@Test
+	void testMainMethod() {
+		String[] args = {};
+		LgnSpringApiApplication.main(args);
+	}
+
 }

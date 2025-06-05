@@ -9,11 +9,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeMap;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.List;
-
 import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.List;
+import java.lang.reflect.Field;
 
 @ExtendWith(MockitoExtension.class)
 class GroupConverterTest {
@@ -88,5 +90,86 @@ class GroupConverterTest {
         resultGroup.getMembers().forEach(member -> {
             assertThat(member.getGroup()).isEqualTo(resultGroup);
         });
+    }
+    
+    @Test
+    void shouldUpdateExistingEntityWhenConvertToEntityWithExistingGroup() {
+        // Arrange
+        Group existingGroup = new Group();
+        existingGroup.setId(1L);
+        existingGroup.setName("Old Name");
+
+        GroupDTO dto = new GroupDTO();
+        dto.setName("Updated Name");
+
+        // Act
+        Group result = groupConverter.convertToEntity(dto, existingGroup);
+
+        // Assert
+        assertThat(result).isSameAs(existingGroup);
+        assertThat(result.getName()).isEqualTo("Updated Name");
+    }
+    
+    @Test
+    void shouldConvertEntityToDtoCorrectly() {
+        // Act
+        GroupDTO result = groupConverter.convertToDto(group);
+
+        // Assert
+        assertThat(result).isNotNull();
+        assertThat(result.getName()).isEqualTo("Grupo 1");
+        assertThat(result.getMembers()).hasSize(2);
+        assertThat(result.getMembers().get(0).getName()).isEqualTo("João");
+    }
+    
+    @Test
+    void shouldConvertListOfEntitiesToListOfDtos() {
+        // Arrange
+        List<Group> groups = List.of(group);
+
+        // Act
+        List<GroupDTO> result = groupConverter.convertToDto(groups);
+
+        // Assert
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getName()).isEqualTo("Grupo 1");
+        assertThat(result.get(0).getMembers()).hasSize(2);
+    }
+    
+    @Test
+    void shouldReturnEmptyListWhenConvertingNullOrEmptyDtos() {
+        // Act
+        List<Group> result = groupConverter.convertToEntity(List.of());
+
+        // Assert
+        assertThat(result).isEmpty();
+    }
+    
+    @Test
+    void shouldHandleGroupWithNullMembers() {
+        // Arrange
+        GroupDTO dto = new GroupDTO();
+        dto.setName("Group Sem Membros");
+
+        // Act
+        Group entity = groupConverter.convertToEntity(dto);
+
+        // Assert
+        assertThat(entity.getMembers()).isNotNull().isEmpty();
+    }
+    
+    @Test
+    void testEnsureTypeMapConfigured_IsCached() throws Exception {
+        groupConverter.convertToEntity(groupDTO);
+
+        Field propertyMapperDtoField = GroupConverter.class.getDeclaredField("propertyMapperDto");
+        propertyMapperDtoField.setAccessible(true);
+
+        TypeMap<GroupDTO, Group> firstMap = (TypeMap<GroupDTO, Group>) propertyMapperDtoField.get(groupConverter);
+
+        groupConverter.convertToEntity(groupDTO);
+        TypeMap<GroupDTO, Group> secondMap = (TypeMap<GroupDTO, Group>) propertyMapperDtoField.get(groupConverter);
+
+        assertThat(firstMap).isSameAs(secondMap);
     }
 }

@@ -8,11 +8,16 @@ import br.edu.fatecsjc.lgnspringapi.entity.Member;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeMap;
 
 import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class MarathonsConverterTest {
 
@@ -134,5 +139,73 @@ public class MarathonsConverterTest {
         assertEquals("Y", dtos.get(1).getIdentification());
         assertNotNull(dtos.get(0).getMembers());
         assertEquals("Charlie", dtos.get(0).getMembers().get(0).getName());
+    }
+    
+    @Test
+    void shouldUpdateExistingMarathonAndReplaceMembers() {
+        Member existingMember = new Member();
+        existingMember.setId(1L);
+        existingMember.setName("Alice");
+        existingMember.setMarathons(new ArrayList<>());
+
+        Marathons existing = new Marathons();
+        existing.setId(1L);
+        existing.setIdentification("Old Name");
+        existing.setMembers(List.of(existingMember));
+
+        MemberDTO newMemberDTO = MemberDTO.builder().id(2L).name("Bob").build();
+        MarathonsDTO dto = MarathonsDTO.builder()
+                .id(1L)
+                .identification("Updated Marathon")
+                .members(List.of(newMemberDTO))
+                .build();
+
+        Marathons updated = marathonsConverter.convertToEntity(dto, existing);
+
+        assertNotNull(updated);
+        assertEquals("Updated Marathon", updated.getIdentification());
+        assertEquals(1, updated.getMembers().size());
+        assertEquals("Bob", updated.getMembers().get(0).getName());
+
+        // Verifica o relacionamento inverso
+        assertTrue(updated.getMembers().get(0).getMarathons().contains(updated));
+        assertFalse(existingMember.getMarathons().contains(updated)); // Antigo membro foi removido
+    }
+    
+    @Test
+    void testEnsureTypeMapConfigured_IsCached() throws Exception {
+        Field propertyMapperDtoField = MarathonsConverter.class.getDeclaredField("propertyMapperDto");
+        propertyMapperDtoField.setAccessible(true);
+
+        // Primeira chamada
+        marathonsConverter.convertToEntity(MarathonsDTO.builder().build());
+        TypeMap<MarathonsDTO, Marathons> firstMap = (TypeMap<MarathonsDTO, Marathons>) propertyMapperDtoField.get(marathonsConverter);
+
+        // Segunda chamada
+        marathonsConverter.convertToEntity(MarathonsDTO.builder().build());
+        TypeMap<MarathonsDTO, Marathons> secondMap = (TypeMap<MarathonsDTO, Marathons>) propertyMapperDtoField.get(marathonsConverter);
+
+        assertSame(firstMap, secondMap);
+    }
+    
+    @Test
+    void shouldSetBidirectionalRelationshipForMultipleMembers() {
+        MemberDTO m1 = MemberDTO.builder().id(1L).name("John").build();
+        MemberDTO m2 = MemberDTO.builder().id(2L).name("Anna").build();
+
+        MarathonsDTO dto = MarathonsDTO.builder()
+                .identification("Multi Members")
+                .members(Arrays.asList(m1, m2))
+                .build();
+
+        Marathons entity = marathonsConverter.convertToEntity(dto);
+
+        assertNotNull(entity);
+        assertEquals(2, entity.getMembers().size());
+
+        entity.getMembers().forEach(member -> {
+            assertNotNull(member.getMarathons());
+            assertTrue(member.getMarathons().contains(entity));
+        });
     }
 }

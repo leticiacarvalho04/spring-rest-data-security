@@ -3,13 +3,9 @@ package br.edu.fatecsjc.lgnspringapi.dto;
 import br.edu.fatecsjc.lgnspringapi.enums.Role;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest
-@AutoConfigureMockMvc
 class RegisterRequestDTOTest {
 
     private RegisterRequestDTO registerRequestDTO;
@@ -124,5 +120,74 @@ class RegisterRequestDTOTest {
         // Test hash code
         assertEquals(dto1.hashCode(), dto2.hashCode());
         assertNotEquals(dto1.hashCode(), differentDTO.hashCode());
+    }
+
+    @Test
+    void shouldNotBeEqualToNull() {
+        RegisterRequestDTO dto = new RegisterRequestDTO();
+        assertFalse(dto.equals(null));
+    }
+
+    @Test
+    void shouldNotBeEqualToDifferentObjectType() {
+        RegisterRequestDTO dto = new RegisterRequestDTO();
+        Object other = new Object();
+        assertFalse(dto.equals(other));
+    }
+
+    @Test
+    void shouldEqualsHandleNullFieldsCorrectly() {
+        RegisterRequestDTO dto1 = new RegisterRequestDTO();
+        RegisterRequestDTO dto2 = new RegisterRequestDTO();
+
+        assertTrue(dto1.equals(dto2));
+        assertEquals(dto1.hashCode(), dto2.hashCode());
+    }
+
+    @Test
+    void shouldNotBeEqualWhenOneFieldDiffers() {
+        RegisterRequestDTO dto1 = RegisterRequestDTO.builder()
+                .firstname("John")
+                .lastname("Doe")
+                .email("john.doe@example.com")
+                .password("password123")
+                .role(Role.ADMIN)
+                .build();
+
+        RegisterRequestDTO dto2 = RegisterRequestDTO.builder()
+                .firstname("John")
+                .lastname("Doe")
+                .email("john.doe@example.com")
+                .password("wrongPassword")
+                .role(Role.ADMIN)
+                .build();
+
+        assertNotEquals(dto1, dto2);
+        assertNotEquals(dto1.hashCode(), dto2.hashCode());
+    }
+
+    @Test
+    void shouldGenerateToStringWithNullFields() {
+        RegisterRequestDTO dto = new RegisterRequestDTO();
+        String toString = dto.toString();
+
+        assertNotNull(toString);
+        assertTrue(toString.contains("RegisterRequestDTO"));
+    }
+
+    @Test
+    void shouldHashCodeBeConsistent() {
+        RegisterRequestDTO dto = RegisterRequestDTO.builder()
+                .firstname("John")
+                .lastname("Doe")
+                .email("john.doe@example.com")
+                .password("password123")
+                .role(Role.ADMIN)
+                .build();
+
+        int firstHash = dto.hashCode();
+        int secondHash = dto.hashCode();
+
+        assertEquals(firstHash, secondHash);
     }
 }
