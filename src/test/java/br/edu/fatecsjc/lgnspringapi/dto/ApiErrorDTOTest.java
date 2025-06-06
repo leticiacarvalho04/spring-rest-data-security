@@ -96,4 +96,81 @@ class ApiErrorDTOTest {
         assertEquals(dto1.hashCode(), dto2.hashCode());
         assertNotEquals(dto1.hashCode(), differentDTO.hashCode());
     }
+
+    @Test
+    void shouldEqualsHandleNullAndOtherTypes() {
+        ApiErrorDTO dto = ApiErrorDTO.builder()
+                .message(ERROR_MESSAGE)
+                .timestamp(NOW)
+                .build();
+
+        assertNotEquals(dto, null);
+        assertNotEquals(dto, "not an ApiErrorDTO");
+        assertEquals(dto, dto); // reflexive
+    }
+
+    @Test
+    void shouldHandleNullFieldsInEqualsAndHashCodeAndToString() {
+        ApiErrorDTO dto1 = new ApiErrorDTO();
+        ApiErrorDTO dto2 = new ApiErrorDTO();
+
+        assertEquals(dto1, dto2);
+        assertEquals(dto1.hashCode(), dto2.hashCode());
+
+        String toString = dto1.toString();
+        assertNotNull(toString);
+        assertTrue(toString.contains("ApiErrorDTO"));
+    }
+
+    @Test
+    void shouldNotBeEqualWhenOnlyMessageDiffers() {
+        ApiErrorDTO dto1 = ApiErrorDTO.builder()
+                .message(ERROR_MESSAGE)
+                .timestamp(NOW)
+                .build();
+
+        ApiErrorDTO dto2 = ApiErrorDTO.builder()
+                .message("Other message")
+                .timestamp(NOW)
+                .build();
+
+        assertNotEquals(dto1, dto2);
+    }
+
+    @Test
+    void shouldNotBeEqualWhenOnlyTimestampDiffers() {
+        ApiErrorDTO dto1 = ApiErrorDTO.builder()
+                .message(ERROR_MESSAGE)
+                .timestamp(NOW)
+                .build();
+
+        ApiErrorDTO dto2 = ApiErrorDTO.builder()
+                .message(ERROR_MESSAGE)
+                .timestamp(NOW.minusSeconds(100))
+                .build();
+
+        assertNotEquals(dto1, dto2);
+    }
+
+    @Test
+    void shouldNotBeEqualWhenOneFieldIsNull() {
+        ApiErrorDTO dto1 = ApiErrorDTO.builder()
+                .message(ERROR_MESSAGE)
+                .timestamp(null)
+                .build();
+
+        ApiErrorDTO dto2 = ApiErrorDTO.builder()
+                .message(ERROR_MESSAGE)
+                .timestamp(NOW)
+                .build();
+
+        assertNotEquals(dto1, dto2);
+
+        ApiErrorDTO dto3 = ApiErrorDTO.builder()
+                .message(null)
+                .timestamp(NOW)
+                .build();
+
+        assertNotEquals(dto2, dto3);
+    }
 }
