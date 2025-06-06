@@ -40,6 +40,7 @@ class GroupResourceTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @MockBean
     private GroupDTO validGroupDto;
 
     @BeforeEach
