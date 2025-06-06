@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "GroupResponse",
+  "type": "object",
+  "properties": {
+    "id": { "type": "integer" },
+    "name": { "type": "string" },
+    "members": {
+      "type": "array",
+      "items": { "type": "object" }
+    },
+    "organization": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "integer" },
+        "name": { "type": "string" }
+      },
+      "required": ["name"]
+    }
+  },
+  "required": ["id", "name", "organization", "members"]
+}
