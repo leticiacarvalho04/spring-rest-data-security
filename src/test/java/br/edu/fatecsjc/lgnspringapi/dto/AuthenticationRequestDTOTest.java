@@ -92,4 +92,81 @@ class AuthenticationRequestDTOTest {
         assertEquals(dto1.hashCode(), dto2.hashCode());
         assertNotEquals(dto1.hashCode(), differentDTO.hashCode());
     }
+
+    @Test
+    void shouldEqualsHandleNullAndOtherTypes() {
+        AuthenticationRequestDTO dto = AuthenticationRequestDTO.builder()
+                .email("test@example.com")
+                .password("password123")
+                .build();
+
+        assertNotEquals(dto, null);
+        assertNotEquals(dto, "not a DTO");
+        assertEquals(dto, dto); // reflexive
+    }
+
+    @Test
+    void shouldHandleNullFieldsInEqualsAndHashCodeAndToString() {
+        AuthenticationRequestDTO dto1 = new AuthenticationRequestDTO();
+        AuthenticationRequestDTO dto2 = new AuthenticationRequestDTO();
+
+        assertEquals(dto1, dto2);
+        assertEquals(dto1.hashCode(), dto2.hashCode());
+
+        String toString = dto1.toString();
+        assertNotNull(toString);
+        assertTrue(toString.contains("AuthenticationRequestDTO"));
+    }
+
+    @Test
+    void shouldNotBeEqualWhenOnlyEmailDiffers() {
+        AuthenticationRequestDTO dto1 = AuthenticationRequestDTO.builder()
+                .email("test@example.com")
+                .password("password123")
+                .build();
+
+        AuthenticationRequestDTO dto2 = AuthenticationRequestDTO.builder()
+                .email("other@example.com")
+                .password("password123")
+                .build();
+
+        assertNotEquals(dto1, dto2);
+    }
+
+    @Test
+    void shouldNotBeEqualWhenOnlyPasswordDiffers() {
+        AuthenticationRequestDTO dto1 = AuthenticationRequestDTO.builder()
+                .email("test@example.com")
+                .password("password123")
+                .build();
+
+        AuthenticationRequestDTO dto2 = AuthenticationRequestDTO.builder()
+                .email("test@example.com")
+                .password("otherPassword")
+                .build();
+
+        assertNotEquals(dto1, dto2);
+    }
+
+    @Test
+    void shouldNotBeEqualWhenOneFieldIsNull() {
+        AuthenticationRequestDTO dto1 = AuthenticationRequestDTO.builder()
+                .email("test@example.com")
+                .password(null)
+                .build();
+
+        AuthenticationRequestDTO dto2 = AuthenticationRequestDTO.builder()
+                .email("test@example.com")
+                .password("password123")
+                .build();
+
+        assertNotEquals(dto1, dto2);
+
+        AuthenticationRequestDTO dto3 = AuthenticationRequestDTO.builder()
+                .email(null)
+                .password("password123")
+                .build();
+
+        assertNotEquals(dto2, dto3);
+    }
 }

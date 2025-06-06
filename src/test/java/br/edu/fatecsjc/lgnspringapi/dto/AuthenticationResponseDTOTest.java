@@ -92,4 +92,81 @@ class AuthenticationResponseDTOTest {
         assertEquals(dto1.hashCode(), dto2.hashCode());
         assertNotEquals(dto1.hashCode(), differentDTO.hashCode());
     }
+
+    @Test
+    void shouldEqualsHandleNullAndOtherTypes() {
+        AuthenticationResponseDTO dto = AuthenticationResponseDTO.builder()
+                .accessToken("access")
+                .refreshToken("refresh")
+                .build();
+
+        assertNotEquals(dto, null);
+        assertNotEquals(dto, "not a DTO");
+        assertEquals(dto, dto); // reflexive
+    }
+
+    @Test
+    void shouldHandleNullFieldsInEqualsAndHashCodeAndToString() {
+        AuthenticationResponseDTO dto1 = new AuthenticationResponseDTO();
+        AuthenticationResponseDTO dto2 = new AuthenticationResponseDTO();
+
+        assertEquals(dto1, dto2);
+        assertEquals(dto1.hashCode(), dto2.hashCode());
+
+        String toString = dto1.toString();
+        assertNotNull(toString);
+        assertTrue(toString.contains("AuthenticationResponseDTO"));
+    }
+
+    @Test
+    void shouldNotBeEqualWhenOnlyAccessTokenDiffers() {
+        AuthenticationResponseDTO dto1 = AuthenticationResponseDTO.builder()
+                .accessToken("access")
+                .refreshToken("refresh")
+                .build();
+
+        AuthenticationResponseDTO dto2 = AuthenticationResponseDTO.builder()
+                .accessToken("other-access")
+                .refreshToken("refresh")
+                .build();
+
+        assertNotEquals(dto1, dto2);
+    }
+
+    @Test
+    void shouldNotBeEqualWhenOnlyRefreshTokenDiffers() {
+        AuthenticationResponseDTO dto1 = AuthenticationResponseDTO.builder()
+                .accessToken("access")
+                .refreshToken("refresh")
+                .build();
+
+        AuthenticationResponseDTO dto2 = AuthenticationResponseDTO.builder()
+                .accessToken("access")
+                .refreshToken("other-refresh")
+                .build();
+
+        assertNotEquals(dto1, dto2);
+    }
+
+    @Test
+    void shouldNotBeEqualWhenOneFieldIsNull() {
+        AuthenticationResponseDTO dto1 = AuthenticationResponseDTO.builder()
+                .accessToken("access")
+                .refreshToken(null)
+                .build();
+
+        AuthenticationResponseDTO dto2 = AuthenticationResponseDTO.builder()
+                .accessToken("access")
+                .refreshToken("refresh")
+                .build();
+
+        assertNotEquals(dto1, dto2);
+
+        AuthenticationResponseDTO dto3 = AuthenticationResponseDTO.builder()
+                .accessToken(null)
+                .refreshToken("refresh")
+                .build();
+
+        assertNotEquals(dto2, dto3);
+    }
 }
