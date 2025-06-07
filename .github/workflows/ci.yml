@@ -28,15 +28,14 @@ jobs:
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-maven
 
-      # Gera cobertura unitária (profile test deve usar H2)
-      - name: Run Unit Tests and Generate Coverage
-        run: mvn clean verify -Punit-test
+      - name: Run Unit Tests
+        run: mvn clean verify
 
       - name: Upload JaCoCo Report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: jacoco-report
-          path: target/site/jacoco/jacoco.xml
+          path: target/jacoco-report/jacoco.xml
 
   static-analysis:
     name: Static Analysis with SonarCloud
@@ -61,7 +60,7 @@ jobs:
           restore-keys: ${{ runner.os }}-maven
 
       - name: Download JaCoCo Report
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: jacoco-report
 

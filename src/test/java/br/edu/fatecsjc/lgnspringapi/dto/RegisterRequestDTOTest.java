@@ -222,15 +222,12 @@ class RegisterRequestDTOTest {
     }
 
     @Test
-    void shouldBeReflexive() {
-        RegisterRequestDTO dto = RegisterRequestDTO.builder()
-                .firstname("John")
-                .lastname("Doe")
-                .email("john.doe@example.com")
-                .password("password123")
-                .role(Role.ADMIN)
-                .build();
-        assertEquals(dto, dto);
+    void shouldEqualsAndHashCodeWithAllFieldsNullObjects() {
+        RegisterRequestDTO dto1 = RegisterRequestDTO.builder().build();
+        RegisterRequestDTO dto2 = RegisterRequestDTO.builder().build();
+
+        assertEquals(dto1, dto2);
+        assertEquals(dto1.hashCode(), dto2.hashCode());
     }
 
     @Test
