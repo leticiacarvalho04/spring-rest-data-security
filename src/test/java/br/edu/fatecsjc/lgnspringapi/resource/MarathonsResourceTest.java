@@ -1,6 +1,5 @@
 package br.edu.fatecsjc.lgnspringapi.resource;
 
-import br.edu.fatecsjc.lgnspringapi.config.TestSecurityConfig;
 import br.edu.fatecsjc.lgnspringapi.dto.MarathonsDTO;
 import br.edu.fatecsjc.lgnspringapi.service.MarathonsService;
 import org.junit.jupiter.api.BeforeEach;

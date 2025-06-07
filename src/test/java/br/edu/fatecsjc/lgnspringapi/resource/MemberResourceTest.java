@@ -50,29 +50,6 @@ class MemberResourceTest {
         @Autowired
         private WebApplicationContext webApplicationContext;
 
-        @BeforeEach
-        void setup() {
-                mockMvc = MockMvcBuilders
-                                .webAppContextSetup(webApplicationContext)
-                                .apply(SecurityMockMvcConfigurers.springSecurity())
-                                .build();
-        }
-
-        @BeforeEach
-        void setUp() {
-                mockMvc = MockMvcBuilders
-                                .webAppContextSetup(webApplicationContext)
-                                .apply(SecurityMockMvcConfigurers.springSecurity())
-                                .build();
-
-                validMemberDto = MemberDTO.builder()
-                                .id(1L)
-                                .name("John")
-                                .age(25)
-                                .groupId(100L)
-                                .build();
-        }
-
         // --- GET ALL MEMBERS ---
 
         @Test
