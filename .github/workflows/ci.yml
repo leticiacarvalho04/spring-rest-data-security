@@ -82,8 +82,6 @@ jobs:
         env:
           MARIADB_ROOT_PASSWORD: root
           MARIADB_DATABASE: sample
-          MARIADB_USER: root
-          MARIADB_PASSWORD: root
         options: >-
           --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot || exit 1"
           --health-interval=100s
