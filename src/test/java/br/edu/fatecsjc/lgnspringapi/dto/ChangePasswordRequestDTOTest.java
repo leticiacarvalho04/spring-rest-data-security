@@ -99,4 +99,73 @@ class ChangePasswordRequestDTOTest {
         assertNotEquals(dto, "not a dto");
         assertEquals(dto, dto);
     }
+
+    @Test
+    void testEqualsAndHashCodeWithAllFieldsNull() {
+        ChangePasswordRequestDTO dto1 = ChangePasswordRequestDTO.builder().build();
+        ChangePasswordRequestDTO dto2 = ChangePasswordRequestDTO.builder().build();
+
+        assertEquals(dto1, dto2);
+        assertEquals(dto1.hashCode(), dto2.hashCode());
+        assertNotNull(dto1.toString());
+    }
+
+    @Test
+    void testNotEqualsWhenOnlyCurrentPasswordDiffers() {
+        ChangePasswordRequestDTO dto1 = ChangePasswordRequestDTO.builder()
+                .currentPassword("a")
+                .newPassword("b")
+                .confirmationPassword("c")
+                .build();
+
+        ChangePasswordRequestDTO dto2 = ChangePasswordRequestDTO.builder()
+                .currentPassword("x")
+                .newPassword("b")
+                .confirmationPassword("c")
+                .build();
+
+        assertNotEquals(dto1, dto2);
+    }
+
+    @Test
+    void testNotEqualsWhenOnlyNewPasswordDiffers() {
+        ChangePasswordRequestDTO dto1 = ChangePasswordRequestDTO.builder()
+                .currentPassword("a")
+                .newPassword("b")
+                .confirmationPassword("c")
+                .build();
+
+        ChangePasswordRequestDTO dto2 = ChangePasswordRequestDTO.builder()
+                .currentPassword("a")
+                .newPassword("x")
+                .confirmationPassword("c")
+                .build();
+
+        assertNotEquals(dto1, dto2);
+    }
+
+    @Test
+    void testNotEqualsWhenOnlyConfirmationPasswordDiffers() {
+        ChangePasswordRequestDTO dto1 = ChangePasswordRequestDTO.builder()
+                .currentPassword("a")
+                .newPassword("b")
+                .confirmationPassword("c")
+                .build();
+
+        ChangePasswordRequestDTO dto2 = ChangePasswordRequestDTO.builder()
+                .currentPassword("a")
+                .newPassword("b")
+                .confirmationPassword("x")
+                .build();
+
+        assertNotEquals(dto1, dto2);
+    }
+
+    @Test
+    void testAllArgsConstructorWithNulls() {
+        ChangePasswordRequestDTO dto = new ChangePasswordRequestDTO(null, null, null);
+        assertNull(dto.getCurrentPassword());
+        assertNull(dto.getNewPassword());
+        assertNull(dto.getConfirmationPassword());
+    }
 }
