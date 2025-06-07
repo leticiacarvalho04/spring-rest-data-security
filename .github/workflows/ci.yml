@@ -78,14 +78,14 @@ jobs:
       mariadb:
         image: mariadb:10.5
         ports:
-          - 3306:3306
+          - 3307:3306
         env:
           MARIADB_ROOT_PASSWORD: root
           MARIADB_DATABASE: sample
           MARIADB_USER: root
           MARIADB_PASSWORD: root
         options: >-
-          --health-cmd="mysqladmin ping -h localhost -uroot -proot"
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot || exit 1"
           --health-interval=100s
           --health-timeout=100s
           --health-retries=100
@@ -111,7 +111,7 @@ jobs:
 
       - name: Run System Tests
         env:
-          SPRING_DATASOURCE_URL: jdbc:mariadb://127.0.0.1:3306/sample
+          SPRING_DATASOURCE_URL: jdbc:mariadb://127.0.0.1:3307/sample
           SPRING_DATASOURCE_USERNAME: root
           SPRING_DATASOURCE_PASSWORD: root
         run: mvn verify -Psystem-test -Dspring.profiles.active=system-test
