@@ -55,10 +55,7 @@ class MarathonsResourceTest {
                                 .webAppContextSetup(context)
                                 .apply(SecurityMockMvcConfigurers.springSecurity())
                                 .build();
-        }
 
-        @BeforeEach
-        void setup() {
                 mockMarathon = MarathonsDTO.builder()
                                 .id(1L)
                                 .identification("Spring Marathon")
