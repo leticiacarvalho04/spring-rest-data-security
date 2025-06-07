@@ -76,7 +76,7 @@ jobs:
 
     services:
       mariadb:
-        image: mariadb:10.5
+        image: mariadb:10.4
         ports:
           - 3307:3306
         env:
@@ -84,8 +84,8 @@ jobs:
           MARIADB_DATABASE: sample
         options: >-
           --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot || exit 1"
-          --health-interval=100s
-          --health-timeout=100s
+          --health-interval=10s
+          --health-timeout=5s
           --health-retries=30
 
     steps:
@@ -106,6 +106,10 @@ jobs:
             sleep 2
           done
           echo "MariaDB did not start in time" && exit 1
+
+      - name: Show MariaDB logs if unhealthy
+        if: failure()
+        run: docker logs $(docker ps -aqf "ancestor=mariadb:10.4")
 
       - name: Run System Tests
         env:
