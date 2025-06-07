@@ -23,12 +23,15 @@ jobs:
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
             ${{ runner.os }}-maven-
+      - name: Start Docker Compose services
+        run: docker-compose up -d
+
       - name: Build (compile and resolve dependencies)
         run: mvn clean install -DskipTests -Dspring.profiles.active=test
+
       - name: Run unit tests
-        run: mvn test -Dspring.profiles.active=test
-      - name: Generate JaCoCo report
-        run: mvn jacoco:report
+        run: mvn -B test -Dspring.profiles.active=test
+        timeout-minutes: 30
 
   static-analysis:
     runs-on: ubuntu-latest

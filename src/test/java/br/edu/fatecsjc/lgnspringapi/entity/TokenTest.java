@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import br.edu.fatecsjc.lgnspringapi.enums.TokenType;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 class TokenTest {
 
@@ -272,5 +273,12 @@ class TokenTest {
         Token t2 = new Token();
         assertThat(t1).isEqualTo(t2);
         assertThat(t1.hashCode()).isEqualTo(t2.hashCode());
+    }
+
+    @Test
+    void shouldNotBeEqualWhenOnlyBooleanFieldDiffers() {
+        Token t1 = Token.builder().revoked(false).build();
+        Token t2 = Token.builder().revoked(true).build();
+        assertNotEquals(t1, t2);
     }
 }

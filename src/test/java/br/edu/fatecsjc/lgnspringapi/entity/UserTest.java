@@ -11,6 +11,10 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class UserTest {
 
@@ -301,5 +305,35 @@ class UserTest {
         assertThat(userDetails.isAccountNonLocked()).isTrue();
         assertThat(userDetails.isCredentialsNonExpired()).isTrue();
         assertThat(userDetails.isEnabled()).isTrue();
+    }
+
+    @Test
+    void shouldEqualsAndHashCodeWithAllFieldsNull() {
+        User u1 = new User();
+        User u2 = new User();
+        assertEquals(u1, u2);
+        assertEquals(u1.hashCode(), u2.hashCode());
+    }
+
+    @Test
+    void shouldNotBeEqualToNullOrOtherType() {
+        User u = new User();
+        assertNotEquals(u, null);
+        assertNotEquals(u, "string");
+    }
+
+    @Test
+    void shouldNotBeEqualWhenOnlyOneFieldDiffers() {
+        User u1 = User.builder().email("a@a.com").build();
+        User u2 = User.builder().email("b@b.com").build();
+        assertNotEquals(u1, u2);
+    }
+
+    @Test
+    void shouldToStringWithNullFields() {
+        User u = new User();
+        String str = u.toString();
+        assertNotNull(str);
+        assertTrue(str.contains("User"));
     }
 }

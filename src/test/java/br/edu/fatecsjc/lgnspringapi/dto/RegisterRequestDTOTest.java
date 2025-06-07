@@ -190,4 +190,34 @@ class RegisterRequestDTOTest {
 
         assertEquals(firstHash, secondHash);
     }
+
+    @Test
+    void shouldEqualsAndHashCodeWithAllFieldsNull() {
+        RegisterRequestDTO dto1 = new RegisterRequestDTO();
+        RegisterRequestDTO dto2 = new RegisterRequestDTO();
+        assertEquals(dto1, dto2);
+        assertEquals(dto1.hashCode(), dto2.hashCode());
+    }
+
+    @Test
+    void shouldNotBeEqualToNullOrOtherType() {
+        RegisterRequestDTO dto = new RegisterRequestDTO();
+        assertNotEquals(dto, null);
+        assertNotEquals(dto, "string");
+    }
+
+    @Test
+    void shouldNotBeEqualWhenOnlyOneFieldDiffers() {
+        RegisterRequestDTO dto1 = RegisterRequestDTO.builder().firstname("A").build();
+        RegisterRequestDTO dto2 = RegisterRequestDTO.builder().firstname("B").build();
+        assertNotEquals(dto1, dto2);
+    }
+
+    @Test
+    void shouldToStringWithNullFields() {
+        RegisterRequestDTO dto = new RegisterRequestDTO();
+        String str = dto.toString();
+        assertNotNull(str);
+        assertTrue(str.contains("RegisterRequestDTO"));
+    }
 }

@@ -302,4 +302,12 @@ class GroupDTOTest {
         assertNotEquals(dto1, dto2);
         assertNotEquals(dto1.hashCode(), dto2.hashCode());
     }
+
+    @Test
+    void shouldEqualsAndHashCode_ListNullVsEmpty() {
+        GroupDTO dtoNullList = GroupDTO.builder().members(null).build();
+        GroupDTO dtoEmptyList = GroupDTO.builder().members(new ArrayList<>()).build();
+        assertNotEquals(dtoNullList, dtoEmptyList);
+        assertNotEquals(dtoNullList.hashCode(), dtoEmptyList.hashCode());
+    }
 }

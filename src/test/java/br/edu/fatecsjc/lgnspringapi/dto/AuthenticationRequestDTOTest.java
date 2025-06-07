@@ -169,4 +169,14 @@ class AuthenticationRequestDTOTest {
 
         assertNotEquals(dto2, dto3);
     }
+
+    @Test
+    void shouldAllArgsConstructorWithNulls() {
+        AuthenticationRequestDTO dto = AuthenticationRequestDTO.builder()
+                .email(null)
+                .password(null)
+                .build();
+        assertNull(dto.getEmail());
+        assertNull(dto.getPassword());
+    }
 }
