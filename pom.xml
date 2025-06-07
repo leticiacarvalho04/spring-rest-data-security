@@ -185,6 +185,9 @@
                     <includes>
                         <include>**/*Test.java</include>
                     </includes>
+                    <excludes>
+                        <exclude>**/*E2ETest.java</exclude>
+                    </excludes>
                 </configuration>
             </plugin>
             <!-- Failsafe para E2E -->
