@@ -86,9 +86,9 @@ jobs:
           MARIADB_PASSWORD: root
         options: >-
           --health-cmd="mysqladmin ping -h localhost -uroot -proot"
-          --health-interval=15s
-          --health-timeout=5s
-          --health-retries=30
+          --health-interval=100s
+          --health-timeout=100s
+          --health-retries=100
 
     steps:
       - name: Checkout Repository

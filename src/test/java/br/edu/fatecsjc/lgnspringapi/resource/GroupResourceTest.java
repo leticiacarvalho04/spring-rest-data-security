@@ -19,7 +19,6 @@ import java.util.Collections;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.springframework.http.MediaType;
 
 import java.util.List;
@@ -118,7 +117,6 @@ class GroupResourceTest {
     }
 
     @Test
-    @Disabled("")
     void getGroupById_Unauthorized_ShouldReturn403() throws Exception {
         mockMvc.perform(get("/group/1"))
                 .andExpect(status().isForbidden());
@@ -148,7 +146,6 @@ class GroupResourceTest {
 
     @Test
     @WithMockUser(roles = "ADMIN")
-    @Disabled("")
     void registerGroup_ForbiddenDueToMissingAuthority_ShouldReturn403() throws Exception {
         mockMvc.perform(post("/group")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -214,7 +211,6 @@ class GroupResourceTest {
 
     @Test
     @WithMockUser(roles = "ADMIN")
-    @Disabled("")
     void updateGroup_ForbiddenDueToMissingAuthority_ShouldReturn403() throws Exception {
         mockMvc.perform(put("/group/1")
                 .contentType(MediaType.APPLICATION_JSON)
