@@ -109,7 +109,6 @@ jobs:
           done
           echo "MariaDB did not start in time" && exit 1
 
-      # Executa apenas os testes de sistema (E2E), usando profile apropriado
       - name: Run System Tests
         env:
           SPRING_DATASOURCE_URL: jdbc:mariadb://127.0.0.1:3306/sample
