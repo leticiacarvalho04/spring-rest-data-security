@@ -1,6 +1,5 @@
 package br.edu.fatecsjc.lgnspringapi.resource;
 
-import br.edu.fatecsjc.lgnspringapi.config.TestSecurityConfig;
 import br.edu.fatecsjc.lgnspringapi.dto.OrganizationDTO;
 import br.edu.fatecsjc.lgnspringapi.service.OrganizationService;
 import org.junit.jupiter.api.BeforeEach;
@@ -10,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.test.context.support.WithMockUser;
