@@ -140,4 +140,166 @@ class MarathonsDTOTest {
         assertEquals(dto1.hashCode(), dto2.hashCode());
         assertNotEquals(dto1.hashCode(), differentDTO.hashCode());
     }
+
+    @Test
+    void shouldEqualsHandleNullAndOtherTypes() {
+        MarathonsDTO dto = MarathonsDTO.builder()
+                .id(1L)
+                .identification("Run")
+                .weight(10.0)
+                .score(1)
+                .members(List.of())
+                .build();
+
+        assertNotEquals(dto, null);
+        assertNotEquals(dto, "not a MarathonsDTO");
+        assertEquals(dto, dto); // reflexivo
+    }
+
+    @Test
+    void shouldHandleNullFieldsInEqualsAndHashCodeAndToString() {
+        MarathonsDTO dto1 = new MarathonsDTO();
+        MarathonsDTO dto2 = new MarathonsDTO();
+
+        assertEquals(dto1, dto2);
+        assertEquals(dto1.hashCode(), dto2.hashCode());
+
+        String toString = dto1.toString();
+        assertNotNull(toString);
+        assertTrue(toString.contains("MarathonsDTO"));
+    }
+
+    @Test
+    void shouldNotBeEqualWhenOnlyIdDiffers() {
+        MarathonsDTO dto1 = MarathonsDTO.builder()
+                .id(1L)
+                .identification("Run")
+                .weight(10.0)
+                .score(1)
+                .members(List.of())
+                .build();
+
+        MarathonsDTO dto2 = MarathonsDTO.builder()
+                .id(2L)
+                .identification("Run")
+                .weight(10.0)
+                .score(1)
+                .members(List.of())
+                .build();
+
+        assertNotEquals(dto1, dto2);
+    }
+
+    @Test
+    void shouldNotBeEqualWhenOnlyIdentificationDiffers() {
+        MarathonsDTO dto1 = MarathonsDTO.builder()
+                .id(1L)
+                .identification("RunA")
+                .weight(10.0)
+                .score(1)
+                .members(List.of())
+                .build();
+
+        MarathonsDTO dto2 = MarathonsDTO.builder()
+                .id(1L)
+                .identification("RunB")
+                .weight(10.0)
+                .score(1)
+                .members(List.of())
+                .build();
+
+        assertNotEquals(dto1, dto2);
+    }
+
+    @Test
+    void shouldNotBeEqualWhenOnlyWeightDiffers() {
+        MarathonsDTO dto1 = MarathonsDTO.builder()
+                .id(1L)
+                .identification("Run")
+                .weight(10.0)
+                .score(1)
+                .members(List.of())
+                .build();
+
+        MarathonsDTO dto2 = MarathonsDTO.builder()
+                .id(1L)
+                .identification("Run")
+                .weight(20.0)
+                .score(1)
+                .members(List.of())
+                .build();
+
+        assertNotEquals(dto1, dto2);
+    }
+
+    @Test
+    void shouldNotBeEqualWhenOnlyScoreDiffers() {
+        MarathonsDTO dto1 = MarathonsDTO.builder()
+                .id(1L)
+                .identification("Run")
+                .weight(10.0)
+                .score(1)
+                .members(List.of())
+                .build();
+
+        MarathonsDTO dto2 = MarathonsDTO.builder()
+                .id(1L)
+                .identification("Run")
+                .weight(10.0)
+                .score(2)
+                .members(List.of())
+                .build();
+
+        assertNotEquals(dto1, dto2);
+    }
+
+    @Test
+    void shouldNotBeEqualWhenOnlyMembersDiffers() {
+        MemberDTO memberA = MemberDTO.builder().name("A").build();
+        MemberDTO memberB = MemberDTO.builder().name("B").build();
+
+        MarathonsDTO dto1 = MarathonsDTO.builder()
+                .id(1L)
+                .identification("Run")
+                .weight(10.0)
+                .score(1)
+                .members(List.of(memberA))
+                .build();
+
+        MarathonsDTO dto2 = MarathonsDTO.builder()
+                .id(1L)
+                .identification("Run")
+                .weight(10.0)
+                .score(1)
+                .members(List.of(memberB))
+                .build();
+
+        assertNotEquals(dto1, dto2);
+    }
+
+    @Test
+    void shouldUseAllArgsConstructorWithNulls() {
+        MarathonsDTO dto = new MarathonsDTO(null, null, null, 0, null);
+        assertNull(dto.getId());
+        assertNull(dto.getIdentification());
+        assertNull(dto.getWeight());
+        assertEquals(0, dto.getScore());
+        assertNull(dto.getMembers());
+    }
+
+    @Test
+    void shouldUseBuilderWithNulls() {
+        MarathonsDTO dto = MarathonsDTO.builder()
+                .id(null)
+                .identification(null)
+                .weight(null)
+                .score(0)
+                .members(null)
+                .build();
+        assertNull(dto.getId());
+        assertNull(dto.getIdentification());
+        assertNull(dto.getWeight());
+        assertEquals(0, dto.getScore());
+        assertNull(dto.getMembers());
+    }
 }
