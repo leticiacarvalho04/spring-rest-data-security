@@ -1,4 +1,4 @@
-name: CI
+name: CI Pipeline
 
 on:
   push:
@@ -8,55 +8,99 @@ on:
 
 jobs:
   unit-test:
+    name: Run Unit Tests
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
           java-version: "17"
           distribution: "temurin"
+
       - name: Cache Maven packages
         uses: actions/cache@v3
         with:
-          path: ~/.m2/repository
+          path: ~/.m2
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
-      - name: Start Docker Compose services
-        run: docker-compose up -d
+          restore-keys: ${{ runner.os }}-maven
 
-      - name: Build (compile and resolve dependencies)
-        run: mvn clean install -DskipTests -Dspring.profiles.active=test
-
-      - name: Run unit tests
-        run: mvn -B test -Dspring.profiles.active=test
-        timeout-minutes: 30
+      - name: Run Unit Tests and Generate Coverage
+        run: mvn clean verify
 
   static-analysis:
-    runs-on: ubuntu-latest
+    name: Static Analysis with SonarCloud
     needs: unit-test
+    runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
           java-version: "17"
           distribution: "temurin"
-      - name: SonarCloud Scan
+
+      - name: Cache Maven packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-maven
+
+      - name: Build and Analyze with SonarCloud
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: mvn sonar:sonar -Dsonar.login=$SONAR_TOKEN
+        run: mvn verify sonar:sonar -Dsonar.projectKey=leticiacarvalho04_spring-rest-data-security -Dsonar.organization=leticiacarvalho04 -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=$SONAR_TOKEN
 
   system-test:
-    runs-on: ubuntu-latest
+    name: API System Tests
     needs: static-analysis
+    runs-on: ubuntu-latest
+
+    services:
+      mariadb:
+        image: mariadb:10.11
+        ports:
+          - 3306:3306
+        env:
+          MARIADB_ROOT_PASSWORD: root
+          MARIADB_DATABASE: sample
+          MARIADB_USER: root
+          MARIADB_PASSWORD: root
+        options: >-
+          --health-cmd="mariadb-admin ping --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
           java-version: "17"
           distribution: "temurin"
-      - name: Build and run E2E tests
-        run: mvn verify -P e2e
+
+      - name: Wait for MariaDB to be ready
+        run: |
+          for i in {1..30}; do
+            nc -z 127.0.0.1 3306 && echo "MariaDB is up!" && exit 0
+            echo "Waiting for MariaDB..."
+            sleep 2
+          done
+          echo "MariaDB did not start in time" && exit 1
+
+      - name: Run System Tests
+        env:
+          SPRING_DATASOURCE_URL: jdbc:mariadb://127.0.0.1:3306/sample
+          SPRING_DATASOURCE_USERNAME: root
+          SPRING_DATASOURCE_PASSWORD: root
+        run: mvn verify -Psystem-tests
