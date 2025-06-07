@@ -20,6 +20,7 @@ import org.springframework.security.web.authentication.logout.LogoutHandler;
 @EnableWebSecurity
 @RequiredArgsConstructor
 @EnableMethodSecurity
+@Profile("!test")
 public class SecurityConfig {
     private static final String[] WHITE_LIST_URL = {
             "/auth/**",
