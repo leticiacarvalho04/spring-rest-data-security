@@ -92,8 +92,7 @@ class OrganizationDTOTest {
                 "RJ",
                 "Innovation School",
                 "Brazil",
-                groups
-        );
+                groups);
 
         assertEquals(2L, dto.getId());
         assertEquals("InovaTech", dto.getName());
@@ -219,5 +218,182 @@ class OrganizationDTOTest {
         // Test hash code
         assertEquals(dto1.hashCode(), dto2.hashCode());
         assertNotEquals(dto1.hashCode(), differentDTO.hashCode());
+    }
+
+    @Test
+    void shouldEqualsHandleNullAndOtherTypes() {
+        OrganizationDTO dto = OrganizationDTO.builder()
+                .id(1L)
+                .name("Org X")
+                .build();
+
+        assertNotEquals(dto, null);
+        assertNotEquals(dto, "not a OrganizationDTO");
+        assertEquals(dto, dto); // reflexivo
+    }
+
+    @Test
+    void shouldHandleNullFieldsInEqualsAndHashCodeAndToString() {
+        OrganizationDTO dto1 = new OrganizationDTO();
+        OrganizationDTO dto2 = new OrganizationDTO();
+
+        assertEquals(dto1, dto2);
+        assertEquals(dto1.hashCode(), dto2.hashCode());
+
+        String toString = dto1.toString();
+        assertNotNull(toString);
+        assertTrue(toString.contains("OrganizationDTO"));
+    }
+
+    @Test
+    void shouldNotBeEqualWhenOnlyIdDiffers() {
+        OrganizationDTO dto1 = OrganizationDTO.builder().id(1L).name("Org").build();
+        OrganizationDTO dto2 = OrganizationDTO.builder().id(2L).name("Org").build();
+        assertNotEquals(dto1, dto2);
+    }
+
+    @Test
+    void shouldNotBeEqualWhenOnlyNameDiffers() {
+        OrganizationDTO dto1 = OrganizationDTO.builder().id(1L).name("Org A").build();
+        OrganizationDTO dto2 = OrganizationDTO.builder().id(1L).name("Org B").build();
+        assertNotEquals(dto1, dto2);
+    }
+
+    @Test
+    void shouldNotBeEqualWhenOnlyGroupDiffers() {
+        Group groupA = new Group();
+        groupA.setId(1L);
+        groupA.setName("A");
+
+        Group groupB = new Group();
+        groupB.setId(2L);
+        groupB.setName("B");
+
+        OrganizationDTO dto1 = OrganizationDTO.builder().id(1L).name("Org").group(List.of(groupA)).build();
+        OrganizationDTO dto2 = OrganizationDTO.builder().id(1L).name("Org").group(List.of(groupB)).build();
+        assertNotEquals(dto1, dto2);
+    }
+
+    @Test
+    void shouldNotBeEqualWhenGroupIsNullVsEmpty() {
+        OrganizationDTO dto1 = OrganizationDTO.builder().id(1L).name("Org").group(null).build();
+        OrganizationDTO dto2 = OrganizationDTO.builder().id(1L).name("Org").group(new ArrayList<>()).build();
+        assertNotEquals(dto1, dto2);
+        assertNotEquals(dto1.hashCode(), dto2.hashCode());
+    }
+
+    @Test
+    void shouldUseAllArgsConstructorWithNulls() {
+        OrganizationDTO dto = new OrganizationDTO(null, null, null, null, null, null, null, null, null, null, null);
+        assertNull(dto.getId());
+        assertNull(dto.getName());
+        assertNull(dto.getNumber());
+        assertNull(dto.getStreet());
+        assertNull(dto.getNeighborhood());
+        assertNull(dto.getCEP());
+        assertNull(dto.getMunicipality());
+        assertNull(dto.getState());
+        assertNull(dto.getInstitutionName());
+        assertNull(dto.getHostCountry());
+        assertNull(dto.getGroup());
+    }
+
+    @Test
+    void shouldUseBuilderWithNulls() {
+        OrganizationDTO dto = OrganizationDTO.builder()
+                .id(null)
+                .name(null)
+                .number(null)
+                .street(null)
+                .neighborhood(null)
+                .CEP(null)
+                .municipality(null)
+                .state(null)
+                .institutionName(null)
+                .hostCountry(null)
+                .group(null)
+                .build();
+        assertNull(dto.getId());
+        assertNull(dto.getName());
+        assertNull(dto.getNumber());
+        assertNull(dto.getStreet());
+        assertNull(dto.getNeighborhood());
+        assertNull(dto.getCEP());
+        assertNull(dto.getMunicipality());
+        assertNull(dto.getState());
+        assertNull(dto.getInstitutionName());
+        assertNull(dto.getHostCountry());
+        assertNull(dto.getGroup());
+    }
+
+    @Test
+    void shouldNotBeEqualWhenOnlyNumberDiffers() {
+        OrganizationDTO dto1 = OrganizationDTO.builder().id(1L).name("Org").number("1").build();
+        OrganizationDTO dto2 = OrganizationDTO.builder().id(1L).name("Org").number("2").build();
+        assertNotEquals(dto1, dto2);
+    }
+
+    @Test
+    void shouldNotBeEqualWhenOnlyStreetDiffers() {
+        OrganizationDTO dto1 = OrganizationDTO.builder().id(1L).name("Org").street("A").build();
+        OrganizationDTO dto2 = OrganizationDTO.builder().id(1L).name("Org").street("B").build();
+        assertNotEquals(dto1, dto2);
+    }
+
+    @Test
+    void shouldNotBeEqualWhenOnlyNeighborhoodDiffers() {
+        OrganizationDTO dto1 = OrganizationDTO.builder().id(1L).name("Org").neighborhood("A").build();
+        OrganizationDTO dto2 = OrganizationDTO.builder().id(1L).name("Org").neighborhood("B").build();
+        assertNotEquals(dto1, dto2);
+    }
+
+    @Test
+    void shouldNotBeEqualWhenOnlyCEPDiffers() {
+        OrganizationDTO dto1 = OrganizationDTO.builder().id(1L).name("Org").CEP("111").build();
+        OrganizationDTO dto2 = OrganizationDTO.builder().id(1L).name("Org").CEP("222").build();
+        assertNotEquals(dto1, dto2);
+    }
+
+    @Test
+    void shouldNotBeEqualWhenOnlyMunicipalityDiffers() {
+        OrganizationDTO dto1 = OrganizationDTO.builder().id(1L).name("Org").municipality("A").build();
+        OrganizationDTO dto2 = OrganizationDTO.builder().id(1L).name("Org").municipality("B").build();
+        assertNotEquals(dto1, dto2);
+    }
+
+    @Test
+    void shouldNotBeEqualWhenOnlyStateDiffers() {
+        OrganizationDTO dto1 = OrganizationDTO.builder().id(1L).name("Org").state("A").build();
+        OrganizationDTO dto2 = OrganizationDTO.builder().id(1L).name("Org").state("B").build();
+        assertNotEquals(dto1, dto2);
+    }
+
+    @Test
+    void shouldNotBeEqualWhenOnlyInstitutionNameDiffers() {
+        OrganizationDTO dto1 = OrganizationDTO.builder().id(1L).name("Org").institutionName("A").build();
+        OrganizationDTO dto2 = OrganizationDTO.builder().id(1L).name("Org").institutionName("B").build();
+        assertNotEquals(dto1, dto2);
+    }
+
+    @Test
+    void shouldNotBeEqualWhenOnlyHostCountryDiffers() {
+        OrganizationDTO dto1 = OrganizationDTO.builder().id(1L).name("Org").hostCountry("A").build();
+        OrganizationDTO dto2 = OrganizationDTO.builder().id(1L).name("Org").hostCountry("B").build();
+        assertNotEquals(dto1, dto2);
+    }
+
+    @Test
+    void shouldEqualsAndHashCode_ListNullVsEmpty() {
+        OrganizationDTO dtoNullList = OrganizationDTO.builder().id(1L).name("Org").group(null).build();
+        OrganizationDTO dtoEmptyList = OrganizationDTO.builder().id(1L).name("Org").group(new ArrayList<>()).build();
+        assertNotEquals(dtoNullList, dtoEmptyList);
+        assertNotEquals(dtoNullList.hashCode(), dtoEmptyList.hashCode());
+    }
+
+    @Test
+    void shouldEqualsBeConsistent() {
+        OrganizationDTO dto = OrganizationDTO.builder().id(1L).name("Org").build();
+        assertEquals(dto, dto);
+        assertEquals(dto.hashCode(), dto.hashCode());
     }
 }

@@ -122,8 +122,7 @@ class UserTest {
                 "Silva",
                 "joao@example.com",
                 "encoded_password",
-                "USER"
-        );
+                "USER");
     }
 
     @Test
@@ -147,21 +146,21 @@ class UserTest {
         assertThat(emptyUser.getRole()).isNull();
         assertThat(emptyUser.getTokens()).isNull();
     }
-    
+
     @Test
     void shouldHandleNullRoleInAuthorities() {
         User userWithNullRole = User.builder()
                 .id(99L)
                 .email("nullrole@example.com")
                 .password("pass")
-                .role(null) 
+                .role(null)
                 .build();
 
         Collection<? extends GrantedAuthority> authorities = userWithNullRole.getAuthorities();
 
         assertThat(authorities).isEmpty();
     }
-    
+
     @Test
     void shouldHandleNullAndEmptyTokens() {
         User userWithNullTokens = User.builder()
@@ -232,5 +231,75 @@ class UserTest {
                 .build();
 
         assertThat(userWithNullPassword.getPassword()).isNull();
+    }
+
+    @Test
+    void shouldNotBeEqualWhenOnlyIdDiffers() {
+        User u1 = User.builder().id(1L).email("a@a.com").build();
+        User u2 = User.builder().id(2L).email("a@a.com").build();
+        assertThat(u1).isNotEqualTo(u2);
+    }
+
+    @Test
+    void shouldNotBeEqualWhenOnlyFirstNameDiffers() {
+        User u1 = User.builder().id(1L).firstName("A").build();
+        User u2 = User.builder().id(1L).firstName("B").build();
+        assertThat(u1).isNotEqualTo(u2);
+    }
+
+    @Test
+    void shouldNotBeEqualWhenOnlyLastNameDiffers() {
+        User u1 = User.builder().id(1L).lastName("A").build();
+        User u2 = User.builder().id(1L).lastName("B").build();
+        assertThat(u1).isNotEqualTo(u2);
+    }
+
+    @Test
+    void shouldNotBeEqualWhenOnlyEmailDiffers() {
+        User u1 = User.builder().id(1L).email("a@a.com").build();
+        User u2 = User.builder().id(1L).email("b@b.com").build();
+        assertThat(u1).isNotEqualTo(u2);
+    }
+
+    @Test
+    void shouldNotBeEqualWhenOnlyPasswordDiffers() {
+        User u1 = User.builder().id(1L).password("a").build();
+        User u2 = User.builder().id(1L).password("b").build();
+        assertThat(u1).isNotEqualTo(u2);
+    }
+
+    @Test
+    void shouldNotBeEqualWhenOnlyRoleDiffers() {
+        User u1 = User.builder().id(1L).role(Role.USER).build();
+        User u2 = User.builder().id(1L).role(Role.ADMIN).build();
+        assertThat(u1).isNotEqualTo(u2);
+    }
+
+    @Test
+    void shouldNotBeEqualWhenOnlyTokensDiffers() {
+        Token t = Token.builder().id(99L).token("t").build();
+        User u1 = User.builder().id(1L).tokens(List.of(token1)).build();
+        User u2 = User.builder().id(1L).tokens(List.of(t)).build();
+        assertThat(u1).isNotEqualTo(u2);
+    }
+
+    @Test
+    void shouldToStringHandleNullFields() {
+        User u = new User();
+        String str = u.toString();
+        assertThat(str).contains("User");
+    }
+
+    @Test
+    void shouldUserDetailsMethodsHandleNullFields() {
+        User emptyUser = new User();
+        UserDetails userDetails = emptyUser;
+        assertThat(userDetails.getAuthorities()).isEmpty();
+        assertThat(userDetails.getUsername()).isNull();
+        assertThat(userDetails.getPassword()).isNull();
+        assertThat(userDetails.isAccountNonExpired()).isTrue();
+        assertThat(userDetails.isAccountNonLocked()).isTrue();
+        assertThat(userDetails.isCredentialsNonExpired()).isTrue();
+        assertThat(userDetails.isEnabled()).isTrue();
     }
 }

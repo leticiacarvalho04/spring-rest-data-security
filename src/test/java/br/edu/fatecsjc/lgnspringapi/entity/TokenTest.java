@@ -93,8 +93,7 @@ class TokenTest {
                 TokenType.BEARER,
                 true,
                 true,
-                user
-        );
+                user);
 
         assertThat(tokenWithAllArgs.getId()).isEqualTo(4L);
         assertThat(tokenWithAllArgs.getToken()).isEqualTo("allargs-token");
@@ -115,19 +114,19 @@ class TokenTest {
         assertThat(token1).isNotEqualTo(token3);
         assertThat(token1.hashCode()).isNotEqualTo(token3.hashCode());
     }
-    
+
     @Test
     void shouldHaveDefaultValuesWhenUsingNoArgsConstructor() {
         Token emptyToken = new Token();
 
         assertThat(emptyToken.getId()).isNull();
         assertThat(emptyToken.getToken()).isNull();
-        assertThat(emptyToken.getTokenType()).isEqualTo(TokenType.BEARER); 
+        assertThat(emptyToken.getTokenType()).isEqualTo(TokenType.BEARER);
         assertThat(emptyToken.isRevoked()).isFalse();
         assertThat(emptyToken.isExpired()).isFalse();
         assertThat(emptyToken.getUser()).isNull();
     }
-    
+
     @Test
     void shouldHandleEqualsWithDifferentObjects() {
         Token token1 = new Token(7L, "token-789", TokenType.BEARER, false, false, user);
@@ -136,7 +135,7 @@ class TokenTest {
         assertThat(token1.equals("NotAToken")).isFalse();
         assertThat(token1.equals(token1)).isTrue();
     }
-    
+
     @Test
     void shouldHandleHashCodeWithNullFields() {
         Token token1 = new Token();
@@ -202,4 +201,76 @@ class TokenTest {
         assertThat(lazyToken.getUser()).isNull();
     }
 
+    @Test
+    void shouldNotBeEqualWhenOnlyIdDiffers() {
+        Token t1 = new Token(1L, "token", TokenType.BEARER, false, false, user);
+        Token t2 = new Token(2L, "token", TokenType.BEARER, false, false, user);
+        assertThat(t1).isNotEqualTo(t2);
+    }
+
+    @Test
+    void shouldNotBeEqualWhenOnlyTokenDiffers() {
+        Token t1 = new Token(1L, "tokenA", TokenType.BEARER, false, false, user);
+        Token t2 = new Token(1L, "tokenB", TokenType.BEARER, false, false, user);
+        assertThat(t1).isNotEqualTo(t2);
+    }
+
+    @Test
+    void shouldNotBeEqualWhenOnlyTokenTypeDiffers() {
+        Token t1 = new Token(1L, "token", TokenType.BEARER, false, false, user);
+        Token t2 = new Token(1L, "token", null, false, false, user);
+        assertThat(t1).isNotEqualTo(t2);
+    }
+
+    @Test
+    void shouldNotBeEqualWhenOnlyRevokedDiffers() {
+        Token t1 = new Token(1L, "token", TokenType.BEARER, false, false, user);
+        Token t2 = new Token(1L, "token", TokenType.BEARER, true, false, user);
+        assertThat(t1).isNotEqualTo(t2);
+    }
+
+    @Test
+    void shouldNotBeEqualWhenOnlyExpiredDiffers() {
+        Token t1 = new Token(1L, "token", TokenType.BEARER, false, false, user);
+        Token t2 = new Token(1L, "token", TokenType.BEARER, false, true, user);
+        assertThat(t1).isNotEqualTo(t2);
+    }
+
+    @Test
+    void shouldNotBeEqualWhenOnlyUserDiffers() {
+        User user2 = new User();
+        user2.setId(99L);
+        user2.setEmail("other@example.com");
+        Token t1 = new Token(1L, "token", TokenType.BEARER, false, false, user);
+        Token t2 = new Token(1L, "token", TokenType.BEARER, false, false, user2);
+        assertThat(t1).isNotEqualTo(t2);
+    }
+
+    @Test
+    void shouldToStringHandleNullFields() {
+        Token t = new Token();
+        t.setId(null);
+        t.setToken(null);
+        t.setTokenType(null);
+        t.setUser(null);
+        String str = t.toString();
+        assertThat(str).contains("Token");
+    }
+
+    @Test
+    void shouldBuilderAndAllArgsConstructorWithNulls() {
+        Token t1 = Token.builder().id(null).token(null).tokenType(null).revoked(false).expired(false).user(null)
+                .build();
+        Token t2 = new Token(null, null, null, false, false, null);
+        assertThat(t1).isEqualTo(t2);
+        assertThat(t1.hashCode()).isEqualTo(t2.hashCode());
+    }
+
+    @Test
+    void shouldEqualsAndHashCodeWithAllFieldsNull() {
+        Token t1 = new Token();
+        Token t2 = new Token();
+        assertThat(t1).isEqualTo(t2);
+        assertThat(t1.hashCode()).isEqualTo(t2.hashCode());
+    }
 }
