@@ -13,6 +13,7 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@Tag("e2e")
 class E2ETest {
 
         @LocalServerPort
