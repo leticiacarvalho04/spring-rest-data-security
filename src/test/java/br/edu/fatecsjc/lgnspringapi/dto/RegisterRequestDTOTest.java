@@ -220,4 +220,108 @@ class RegisterRequestDTOTest {
         assertNotNull(str);
         assertTrue(str.contains("RegisterRequestDTO"));
     }
+
+    @Test
+    void shouldBeReflexive() {
+        RegisterRequestDTO dto = RegisterRequestDTO.builder()
+                .firstname("John")
+                .lastname("Doe")
+                .email("john.doe@example.com")
+                .password("password123")
+                .role(Role.ADMIN)
+                .build();
+        assertEquals(dto, dto);
+    }
+
+    @Test
+    void shouldNotBeEqualWhenOnlyFirstnameDiffers() {
+        RegisterRequestDTO dto1 = RegisterRequestDTO.builder()
+                .firstname("A")
+                .lastname("Doe")
+                .email("john.doe@example.com")
+                .password("password123")
+                .role(Role.ADMIN)
+                .build();
+        RegisterRequestDTO dto2 = RegisterRequestDTO.builder()
+                .firstname("B")
+                .lastname("Doe")
+                .email("john.doe@example.com")
+                .password("password123")
+                .role(Role.ADMIN)
+                .build();
+        assertNotEquals(dto1, dto2);
+    }
+
+    @Test
+    void shouldNotBeEqualWhenOnlyLastnameDiffers() {
+        RegisterRequestDTO dto1 = RegisterRequestDTO.builder()
+                .firstname("John")
+                .lastname("A")
+                .email("john.doe@example.com")
+                .password("password123")
+                .role(Role.ADMIN)
+                .build();
+        RegisterRequestDTO dto2 = RegisterRequestDTO.builder()
+                .firstname("John")
+                .lastname("B")
+                .email("john.doe@example.com")
+                .password("password123")
+                .role(Role.ADMIN)
+                .build();
+        assertNotEquals(dto1, dto2);
+    }
+
+    @Test
+    void shouldNotBeEqualWhenOnlyEmailDiffers() {
+        RegisterRequestDTO dto1 = RegisterRequestDTO.builder()
+                .firstname("John")
+                .lastname("Doe")
+                .email("a@example.com")
+                .password("password123")
+                .role(Role.ADMIN)
+                .build();
+        RegisterRequestDTO dto2 = RegisterRequestDTO.builder()
+                .firstname("John")
+                .lastname("Doe")
+                .email("b@example.com")
+                .password("password123")
+                .role(Role.ADMIN)
+                .build();
+        assertNotEquals(dto1, dto2);
+    }
+
+    @Test
+    void shouldNotBeEqualWhenOnlyRoleDiffers() {
+        RegisterRequestDTO dto1 = RegisterRequestDTO.builder()
+                .firstname("John")
+                .lastname("Doe")
+                .email("john.doe@example.com")
+                .password("password123")
+                .role(Role.ADMIN)
+                .build();
+        RegisterRequestDTO dto2 = RegisterRequestDTO.builder()
+                .firstname("John")
+                .lastname("Doe")
+                .email("john.doe@example.com")
+                .password("password123")
+                .role(Role.USER)
+                .build();
+        assertNotEquals(dto1, dto2);
+    }
+
+    @Test
+    void shouldAllArgsConstructorWithNulls() {
+        RegisterRequestDTO dto = RegisterRequestDTO.builder()
+                .firstname(null)
+                .lastname(null)
+                .email(null)
+                .password(null)
+                .role(null)
+                .build();
+        assertNull(dto.getFirstname());
+        assertNull(dto.getLastname());
+        assertNull(dto.getEmail());
+        assertNull(dto.getPassword());
+        assertNull(dto.getRole());
+    }
 }

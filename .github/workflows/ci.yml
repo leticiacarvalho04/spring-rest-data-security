@@ -28,8 +28,15 @@ jobs:
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-maven
 
+      # Gera cobertura unitária (profile test deve usar H2)
       - name: Run Unit Tests and Generate Coverage
-        run: mvn clean verify
+        run: mvn clean verify -Punit-test
+
+      - name: Upload JaCoCo Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: jacoco-report
+          path: target/site/jacoco/jacoco.xml
 
   static-analysis:
     name: Static Analysis with SonarCloud
@@ -52,6 +59,11 @@ jobs:
           path: ~/.m2
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-maven
+
+      - name: Download JaCoCo Report
+        uses: actions/download-artifact@v3
+        with:
+          name: jacoco-report
 
       - name: Build and Analyze with SonarCloud
         env:
@@ -98,9 +110,10 @@ jobs:
           done
           echo "MariaDB did not start in time" && exit 1
 
+      # Executa apenas os testes de sistema (E2E), usando profile apropriado
       - name: Run System Tests
         env:
           SPRING_DATASOURCE_URL: jdbc:mariadb://127.0.0.1:3306/sample
           SPRING_DATASOURCE_USERNAME: root
           SPRING_DATASOURCE_PASSWORD: root
-        run: mvn verify -Psystem-tests
+        run: mvn verify -Psystem-test
