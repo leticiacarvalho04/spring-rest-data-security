@@ -340,4 +340,24 @@ class MemberDTOTest {
         MemberDTO dto = MemberDTO.builder().id(1L).build();
         assertThat(dto).isEqualTo(dto);
     }
+
+    @Test
+    void testEqualsWithNull() {
+        MemberDTO dto = MemberDTO.builder().build();
+        assertThat(dto.equals(null)).isFalse();
+    }
+
+    @Test
+    void testEqualsWithOtherType() {
+        MemberDTO dto = MemberDTO.builder().build();
+        assertThat(dto.equals("string")).isFalse();
+    }
+
+    @Test
+    void testEqualsAndHashCodeWithAllFieldsNull() {
+        MemberDTO dto1 = new MemberDTO();
+        MemberDTO dto2 = new MemberDTO();
+        assertThat(dto1).isEqualTo(dto2);
+        assertThat(dto1.hashCode()).isEqualTo(dto2.hashCode());
+    }
 }
