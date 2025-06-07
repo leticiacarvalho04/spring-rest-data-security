@@ -93,7 +93,7 @@ class GroupResourceTest {
     }
 
     @Test
-    @WithMockUser(roles = "USER") // Não é ADMIN
+    @WithMockUser(authorities = "ROLE_USER")
     void getAllGroups_UserWithoutAdminRole_ShouldReturn403() throws Exception {
         mockMvc.perform(get("/group"))
                 .andExpect(status().isForbidden());
