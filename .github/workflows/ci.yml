@@ -29,7 +29,7 @@ jobs:
           restore-keys: ${{ runner.os }}-maven
 
       - name: Run Unit Tests
-        run: mvn test -Dspring.profiles.active=test
+        run: mvn verify -Dspring.profiles.active=test
 
       - name: Upload JaCoCo Report
         uses: actions/upload-artifact@v4
