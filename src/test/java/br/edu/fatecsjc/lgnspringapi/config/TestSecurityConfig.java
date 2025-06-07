@@ -8,12 +8,12 @@ import org.springframework.security.web.SecurityFilterChain;
 @TestConfiguration
 public class TestSecurityConfig {
 
-	@Bean
+	/* @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf().disable()
             .authorizeHttpRequests(authz -> authz
                 .anyRequest().authenticated()
             );
         return http.build();
-    }
-}
+    } */
+} 
