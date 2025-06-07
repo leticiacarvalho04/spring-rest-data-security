@@ -30,247 +30,252 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 @AutoConfigureMockMvc
 class AuthenticationResourceTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+        @Autowired
+        private MockMvc mockMvc;
 
-    @MockBean
-    private AuthenticationService authenticationService;
+        @MockBean
+        private AuthenticationService authenticationService;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+        @Autowired
+        private ObjectMapper objectMapper;
 
-    private RegisterRequestDTO validRegisterDto;
-    private AuthenticationRequestDTO validAuthDto;
+        private RegisterRequestDTO validRegisterDto;
+        private AuthenticationRequestDTO validAuthDto;
 
-    @BeforeEach
-    void setUp() {
-        validRegisterDto = new RegisterRequestDTO("John", "Doe", "john@example.com", "password", null);
-        validAuthDto = new AuthenticationRequestDTO("john@example.com", "password");
-    }
+        @BeforeEach
+        void setUp() {
+                validRegisterDto = new RegisterRequestDTO("John", "Doe", "john@example.com", "password", null);
+                validAuthDto = new AuthenticationRequestDTO("john@example.com", "password");
+        }
 
-    // --- REGISTER ---
+        // --- REGISTER ---
 
-    @Test
-    @WithMockUser
-    void register_ShouldCallServiceAndReturn201() throws Exception {
-        AuthenticationResponseDTO response = new AuthenticationResponseDTO("access_token", "refresh_token");
+        @Test
+        @WithMockUser
+        void register_ShouldCallServiceAndReturn201() throws Exception {
+                AuthenticationResponseDTO response = new AuthenticationResponseDTO("access_token", "refresh_token");
 
-        when(authenticationService.register(any(RegisterRequestDTO.class))).thenReturn(response);
+                when(authenticationService.register(any(RegisterRequestDTO.class))).thenReturn(response);
 
-        mockMvc.perform(post("/auth/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(validRegisterDto)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.accessToken").value("access_token"))
-                .andExpect(jsonPath("$.refreshToken").value("refresh_token"));
+                mockMvc.perform(post("/auth/register")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(validRegisterDto)))
+                                .andExpect(status().isCreated())
+                                .andExpect(jsonPath("$.accessToken").value("access_token"))
+                                .andExpect(jsonPath("$.refreshToken").value("refresh_token"));
 
-        verify(authenticationService, times(1)).register(any(RegisterRequestDTO.class));
-    }
+                verify(authenticationService, times(1)).register(any(RegisterRequestDTO.class));
+        }
 
-    @Test
-    @WithMockUser
-    void register_InvalidFields_DoesNotThrowBadRequest_BecauseNoValidation() throws Exception {
-        RegisterRequestDTO invalidDto = new RegisterRequestDTO("", "", "", "", null); // Campos vazios
+        @Test
+        @WithMockUser
+        void register_InvalidFields_DoesNotThrowBadRequest_BecauseNoValidation() throws Exception {
+                RegisterRequestDTO invalidDto = new RegisterRequestDTO("", "", "", "", null); // Campos vazios
 
-        AuthenticationResponseDTO fakeResponse = new AuthenticationResponseDTO("token", "refresh");
+                AuthenticationResponseDTO fakeResponse = new AuthenticationResponseDTO("token", "refresh");
 
-        when(authenticationService.register(any(RegisterRequestDTO.class))).thenReturn(fakeResponse);
+                when(authenticationService.register(any(RegisterRequestDTO.class))).thenReturn(fakeResponse);
 
-        mockMvc.perform(post("/auth/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(invalidDto)))
-                .andExpect(status().isCreated());
+                mockMvc.perform(post("/auth/register")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(invalidDto)))
+                                .andExpect(status().isCreated());
 
-        verify(authenticationService, times(1)).register(any(RegisterRequestDTO.class));
-    }
+                verify(authenticationService, times(1)).register(any(RegisterRequestDTO.class));
+        }
 
-    @Test
-    @WithMockUser
-    void register_ServiceThrowsException_ShouldReturn400_BecauseNoGlobalExceptionHandler() throws Exception {
-        when(authenticationService.register(any(RegisterRequestDTO.class)))
-                .thenThrow(new RuntimeException("Erro ao registrar usuário"));
+        @Test
+        @WithMockUser
+        void register_ServiceThrowsException_ShouldReturn400_BecauseNoGlobalExceptionHandler() throws Exception {
+                when(authenticationService.register(any(RegisterRequestDTO.class)))
+                                .thenThrow(new RuntimeException("Erro ao registrar usuário"));
 
-        mockMvc.perform(post("/auth/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(validRegisterDto)))
-                .andExpect(status().isBadRequest());
-    }
-    
-    @Test
-    @WithMockUser
-    void register_WithRole_ShouldCallService() throws Exception {
-        RegisterRequestDTO dto = new RegisterRequestDTO("John", "Doe", "john@example.com", "password", Role.ADMIN);
+                mockMvc.perform(post("/auth/register")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(validRegisterDto)))
+                                .andExpect(status().isBadRequest());
+        }
 
-        AuthenticationResponseDTO response = new AuthenticationResponseDTO("token", "refresh");
+        @Test
+        @WithMockUser
+        void register_WithRole_ShouldCallService() throws Exception {
+                RegisterRequestDTO dto = new RegisterRequestDTO("John", "Doe", "john@example.com", "password",
+                                Role.ADMIN);
 
-        when(authenticationService.register(any(RegisterRequestDTO.class))).thenReturn(response);
+                AuthenticationResponseDTO response = new AuthenticationResponseDTO("token", "refresh");
 
-        mockMvc.perform(post("/auth/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
-                .andExpect(status().isCreated());
+                when(authenticationService.register(any(RegisterRequestDTO.class))).thenReturn(response);
 
-        verify(authenticationService).register(dto);
-    }
-    
-    @Test
-    @WithMockUser(username = "admin", roles = "ADMIN")
-    void register_ByAdminUser_ShouldCallService() throws Exception {
-        RegisterRequestDTO dto = new RegisterRequestDTO("John", "Doe", "john@example.com", "password", Role.USER);
+                mockMvc.perform(post("/auth/register")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(dto)))
+                                .andExpect(status().isCreated());
 
-        AuthenticationResponseDTO response = new AuthenticationResponseDTO("token", "refresh");
+                verify(authenticationService).register(dto);
+        }
 
-        when(authenticationService.register(any(RegisterRequestDTO.class))).thenReturn(response);
+        @Test
+        @WithMockUser(username = "admin", roles = "ADMIN")
+        void register_ByAdminUser_ShouldCallService() throws Exception {
+                RegisterRequestDTO dto = new RegisterRequestDTO("John", "Doe", "john@example.com", "password",
+                                Role.USER);
 
-        mockMvc.perform(post("/auth/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
-                .andExpect(status().isCreated());
+                AuthenticationResponseDTO response = new AuthenticationResponseDTO("token", "refresh");
 
-        verify(authenticationService).register(dto);
-    }
+                when(authenticationService.register(any(RegisterRequestDTO.class))).thenReturn(response);
 
-    // --- AUTHENTICATE ---
+                mockMvc.perform(post("/auth/register")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(dto)))
+                                .andExpect(status().isCreated());
 
-    @Test
-    @WithMockUser
-    void authenticate_ShouldCallServiceAndReturn200() throws Exception {
-        AuthenticationResponseDTO response = new AuthenticationResponseDTO("access_token", "refresh_token");
+                verify(authenticationService).register(dto);
+        }
 
-        when(authenticationService.authenticate(any(AuthenticationRequestDTO.class))).thenReturn(response);
+        // --- AUTHENTICATE ---
 
-        mockMvc.perform(post("/auth/authenticate")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(validAuthDto)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.accessToken").value("access_token"))
-                .andExpect(jsonPath("$.refreshToken").value("refresh_token"));
+        @Test
+        @WithMockUser
+        void authenticate_ShouldCallServiceAndReturn200() throws Exception {
+                AuthenticationResponseDTO response = new AuthenticationResponseDTO("access_token", "refresh_token");
 
-        verify(authenticationService, times(1)).authenticate(any(AuthenticationRequestDTO.class));
-    }
+                when(authenticationService.authenticate(any(AuthenticationRequestDTO.class))).thenReturn(response);
 
-    @Test
-    @WithMockUser
-    void authenticate_InvalidCredentials_Returns400_BecauseNoCustomHandling() throws Exception {
-        when(authenticationService.authenticate(any(AuthenticationRequestDTO.class)))
-                .thenThrow(new RuntimeException("Credenciais inválidas"));
+                mockMvc.perform(post("/auth/authenticate")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(validAuthDto)))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.accessToken").value("access_token"))
+                                .andExpect(jsonPath("$.refreshToken").value("refresh_token"));
 
-        mockMvc.perform(post("/auth/authenticate")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(validAuthDto)))
-                .andExpect(status().isBadRequest());
-    }
-    
-    @Test
-    @WithMockUser
-    void authenticate_ServiceReturnsNull_ShouldReturn200ButEmptyBody() throws Exception {
-        when(authenticationService.authenticate(any(AuthenticationRequestDTO.class))).thenReturn(null);
+                verify(authenticationService, times(1)).authenticate(any(AuthenticationRequestDTO.class));
+        }
 
-        mockMvc.perform(post("/auth/authenticate")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(validAuthDto)))
-                .andExpect(status().isOk())
-                .andExpect(content().string(""));
-    }
-    
-    @Test
-    @WithMockUser
-    void authenticate_PasswordIsNull_ShouldStillCallService() throws Exception {
-        AuthenticationRequestDTO dto = new AuthenticationRequestDTO("john@example.com", null);
+        @Test
+        @WithMockUser
+        void authenticate_InvalidCredentials_Returns400_BecauseNoCustomHandling() throws Exception {
+                when(authenticationService.authenticate(any(AuthenticationRequestDTO.class)))
+                                .thenThrow(new RuntimeException("Credenciais inválidas"));
 
-        AuthenticationResponseDTO response = new AuthenticationResponseDTO("token", "refresh");
+                mockMvc.perform(post("/auth/authenticate")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(validAuthDto)))
+                                .andExpect(status().isBadRequest());
+        }
 
-        when(authenticationService.authenticate(any(AuthenticationRequestDTO.class))).thenReturn(response);
+        @Test
+        @WithMockUser
+        void authenticate_ServiceReturnsNull_ShouldReturn200ButEmptyBody() throws Exception {
+                when(authenticationService.authenticate(any(AuthenticationRequestDTO.class))).thenReturn(null);
 
-        mockMvc.perform(post("/auth/authenticate")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
-                .andExpect(status().isOk());
+                mockMvc.perform(post("/auth/authenticate")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(validAuthDto)))
+                                .andExpect(status().isOk())
+                                .andExpect(content().string(""));
+        }
 
-        verify(authenticationService).authenticate(dto);
-    }
-    
-    @Test
-    @WithMockUser
-    void authenticate_EmailIsEmpty_ShouldCallServiceButFailInternally() throws Exception {
-        AuthenticationRequestDTO dto = new AuthenticationRequestDTO("", "password");
+        @Test
+        @WithMockUser
+        void authenticate_PasswordIsNull_ShouldStillCallService() throws Exception {
+                AuthenticationRequestDTO dto = new AuthenticationRequestDTO("john@example.com", null);
 
-        AuthenticationResponseDTO response = new AuthenticationResponseDTO("token", "refresh");
+                AuthenticationResponseDTO response = new AuthenticationResponseDTO("token", "refresh");
 
-        when(authenticationService.authenticate(any(AuthenticationRequestDTO.class))).thenReturn(response);
+                when(authenticationService.authenticate(any(AuthenticationRequestDTO.class))).thenReturn(response);
 
-        mockMvc.perform(post("/auth/authenticate")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
-                .andExpect(status().isOk());
+                mockMvc.perform(post("/auth/authenticate")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(dto)))
+                                .andExpect(status().isOk());
 
-        verify(authenticationService).authenticate(dto);
-    }
-    
-    @Test
-    @WithMockUser
-    void authenticate_Fails_DoesNotCallRegister() throws Exception {
-        when(authenticationService.authenticate(any(AuthenticationRequestDTO.class)))
-                .thenThrow(new RuntimeException("Erro"));
+                verify(authenticationService).authenticate(dto);
+        }
 
-        mockMvc.perform(post("/auth/authenticate")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(validAuthDto)))
-                .andExpect(status().isBadRequest());
+        @Test
+        @WithMockUser
+        void authenticate_EmailIsEmpty_ShouldCallServiceButFailInternally() throws Exception {
+                AuthenticationRequestDTO dto = new AuthenticationRequestDTO("", "password");
 
-        verify(authenticationService, never()).register(any(RegisterRequestDTO.class));
-    }
-    
-    @Test
-    @WithMockUser
-    void authenticate_MalformedJson_ShouldReturn400() throws Exception {
-        String malformedJson = "{email: john@example.com, password:}";
+                AuthenticationResponseDTO response = new AuthenticationResponseDTO("token", "refresh");
 
-        mockMvc.perform(post("/auth/authenticate")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(malformedJson))
-                .andExpect(status().isBadRequest());
-    }
+                when(authenticationService.authenticate(any(AuthenticationRequestDTO.class))).thenReturn(response);
 
-    // --- REFRESH TOKEN ---
+                mockMvc.perform(post("/auth/authenticate")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(dto)))
+                                .andExpect(status().isOk());
 
-    @Test
-    @WithMockUser
-    void refreshToken_ShouldCallServiceAndReturn200() throws Exception {
-        mockMvc.perform(post("/auth/refresh-token"))
-                .andExpect(status().isOk());
+                verify(authenticationService).authenticate(dto);
+        }
 
-        verify(authenticationService, times(1))
-                .refreshToken(any(HttpServletRequest.class), any(HttpServletResponse.class));
-    }
+        @Test
+        @WithMockUser
+        void authenticate_Fails_DoesNotCallRegister() throws Exception {
+                when(authenticationService.authenticate(any(AuthenticationRequestDTO.class)))
+                                .thenThrow(new RuntimeException("Erro"));
 
-    @Test
-    void refreshToken_Unauthorized_Returns200_BecauseSecurityIsNotEnforced() throws Exception {
-        mockMvc.perform(post("/auth/refresh-token"))
-                .andExpect(status().isOk());
+                mockMvc.perform(post("/auth/authenticate")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(validAuthDto)))
+                                .andExpect(status().isBadRequest());
 
-        verify(authenticationService, times(1))
-                .refreshToken(any(HttpServletRequest.class), any(HttpServletResponse.class));
-    }
+                verify(authenticationService, never()).register(any(RegisterRequestDTO.class));
+        }
 
-    @Test
-    @WithMockUser
-    void refreshToken_ServiceThrowsException_Returns400_BecauseNoGlobalExceptionHandler() throws Exception {
-        doThrow(new IOException("Erro ao atualizar token"))
-                .when(authenticationService).refreshToken(any(HttpServletRequest.class), any(HttpServletResponse.class));
+        @Test
+        @WithMockUser
+        void authenticate_MalformedJson_ShouldReturn400() throws Exception {
+                String malformedJson = "{email: john@example.com, password:}";
 
-        mockMvc.perform(post("/auth/refresh-token"))
-                .andExpect(status().isBadRequest());
-    }
-    
-    @Test
-    @WithMockUser
-    void refreshToken_NoHeadersManipulation_ShouldStillWork() throws Exception {
-        doNothing().when(authenticationService).refreshToken(any(HttpServletRequest.class), any(HttpServletResponse.class));
+                mockMvc.perform(post("/auth/authenticate")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(malformedJson))
+                                .andExpect(status().isBadRequest());
+        }
 
-        mockMvc.perform(post("/auth/refresh-token"))
-                .andExpect(status().isOk());
+        // --- REFRESH TOKEN ---
 
-        verify(authenticationService).refreshToken(any(HttpServletRequest.class), any(HttpServletResponse.class));
-    }
+        @Test
+        @WithMockUser
+        void refreshToken_ShouldCallServiceAndReturn200() throws Exception {
+                mockMvc.perform(post("/auth/refresh-token"))
+                                .andExpect(status().isOk());
+
+                verify(authenticationService, times(1))
+                                .refreshToken(any(HttpServletRequest.class), any(HttpServletResponse.class));
+        }
+
+        @Test
+        void refreshToken_Unauthorized_ShouldReturn403() throws Exception {
+                mockMvc.perform(post("/auth/refresh-token"))
+                                .andExpect(status().isForbidden());
+
+                verify(authenticationService, never())
+                                .refreshToken(any(HttpServletRequest.class), any(HttpServletResponse.class));
+        }
+
+        @Test
+        @WithMockUser
+        void refreshToken_ServiceThrowsException_Returns400_BecauseNoGlobalExceptionHandler() throws Exception {
+                doThrow(new IOException("Erro ao atualizar token"))
+                                .when(authenticationService)
+                                .refreshToken(any(HttpServletRequest.class), any(HttpServletResponse.class));
+
+                mockMvc.perform(post("/auth/refresh-token"))
+                                .andExpect(status().isBadRequest());
+        }
+
+        @Test
+        @WithMockUser
+        void refreshToken_NoHeadersManipulation_ShouldStillWork() throws Exception {
+                doNothing().when(authenticationService).refreshToken(any(HttpServletRequest.class),
+                                any(HttpServletResponse.class));
+
+                mockMvc.perform(post("/auth/refresh-token"))
+                                .andExpect(status().isOk());
+
+                verify(authenticationService).refreshToken(any(HttpServletRequest.class),
+                                any(HttpServletResponse.class));
+        }
 }

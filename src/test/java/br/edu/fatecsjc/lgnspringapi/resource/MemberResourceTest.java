@@ -90,7 +90,8 @@ class MemberResourceTest {
         @Test
         @WithMockUser(roles = "ADMIN")
         void shouldReturnMemberById_whenGetMemberByIdIsCalled() throws Exception {
-                when(memberService.findById(1L)).thenReturn(validMemberDto);
+                MemberDTO member = MemberDTO.builder().id(1L).name("John").build();
+                when(memberService.findById(1L)).thenReturn(member);
 
                 mockMvc.perform(get("/member/1"))
                                 .andExpect(status().isOk())
