@@ -7,9 +7,12 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
 
 import java.util.Collections;
 
@@ -43,6 +46,17 @@ class GroupResourceTest {
 
     @MockBean
     private GroupDTO validGroupDto;
+
+    @Autowired
+    private WebApplicationContext context;
+
+    @BeforeEach
+    void setup() {
+        mockMvc = MockMvcBuilders
+                .webAppContextSetup(context)
+                .apply(SecurityMockMvcConfigurers.springSecurity())
+                .build();
+    }
 
     @BeforeEach
     void setUp() {
@@ -113,8 +127,8 @@ class GroupResourceTest {
     void getGroupById_ServiceReturnsNull_ShouldReturn200ButEmptyBody() throws Exception {
         when(groupService.findById(anyLong())).thenReturn(null);
         mockMvc.perform(get("/group/999"))
-               .andExpect(status().isOk())
-               .andExpect(content().string(isEmptyOrNullString())); 
+                .andExpect(status().isOk())
+                .andExpect(content().string(isEmptyOrNullString()));
     }
 
     // --- REGISTER GROUP ---
@@ -123,19 +137,19 @@ class GroupResourceTest {
     void registerGroup_ShouldCallServiceAndReturn201() throws Exception {
         when(groupService.save(any(GroupDTO.class))).thenReturn(validGroupDto);
         mockMvc.perform(post("/group")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(validGroupDto)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(validGroupDto)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.name").value("Developers"));
         verify(groupService, times(1)).save(any(GroupDTO.class));
     }
 
     @Test
-    @WithMockUser(roles = "ADMIN") 
+    @WithMockUser(roles = "ADMIN")
     void registerGroup_ForbiddenDueToMissingAuthority_ShouldReturn403() throws Exception {
         mockMvc.perform(post("/group")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(validGroupDto)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(validGroupDto)))
                 .andExpect(status().isForbidden());
     }
 
@@ -144,8 +158,8 @@ class GroupResourceTest {
     void registerGroup_ServiceThrowsException_ShouldReturn400() throws Exception {
         when(groupService.save(any(GroupDTO.class))).thenThrow(new RuntimeException("Erro ao salvar"));
         mockMvc.perform(post("/group")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(validGroupDto)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(validGroupDto)))
                 .andExpect(status().isBadRequest());
     }
 
@@ -155,8 +169,8 @@ class GroupResourceTest {
         GroupDTO emptyDto = new GroupDTO();
         when(groupService.save(any(GroupDTO.class))).thenReturn(emptyDto);
         mockMvc.perform(post("/group")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(emptyDto)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(emptyDto)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.name").doesNotExist());
         verify(groupService).save(emptyDto);
@@ -167,8 +181,8 @@ class GroupResourceTest {
     void registerGroup_MalformedJson_ShouldReturn400() throws Exception {
         String malformedJson = "{name: \"Developers\"";
         mockMvc.perform(post("/group")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(malformedJson))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(malformedJson))
                 .andExpect(status().isBadRequest());
     }
 
@@ -177,8 +191,8 @@ class GroupResourceTest {
     void registerGroup_NullBody_ShouldCallServiceButFail() throws Exception {
         when(groupService.save(any(GroupDTO.class))).thenThrow(new RuntimeException("Corpo nulo"));
         mockMvc.perform(post("/group")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(""))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(""))
                 .andExpect(status().isBadRequest());
     }
 
@@ -188,19 +202,19 @@ class GroupResourceTest {
     void updateGroup_ShouldCallServiceAndReturn201() throws Exception {
         when(groupService.save(anyLong(), any(GroupDTO.class))).thenReturn(validGroupDto);
         mockMvc.perform(put("/group/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(validGroupDto)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(validGroupDto)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.name").value("Developers"));
         verify(groupService, times(1)).save(eq(1L), any(GroupDTO.class));
     }
 
     @Test
-    @WithMockUser(roles = "ADMIN") 
+    @WithMockUser(roles = "ADMIN")
     void updateGroup_ForbiddenDueToMissingAuthority_ShouldReturn403() throws Exception {
         mockMvc.perform(put("/group/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(validGroupDto)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(validGroupDto)))
                 .andExpect(status().isForbidden());
     }
 
@@ -209,8 +223,8 @@ class GroupResourceTest {
     void updateGroup_ServiceThrowsException_ShouldReturn400() throws Exception {
         when(groupService.save(anyLong(), any(GroupDTO.class))).thenThrow(new RuntimeException("Erro ao atualizar"));
         mockMvc.perform(put("/group/999")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(validGroupDto)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(validGroupDto)))
                 .andExpect(status().isBadRequest());
     }
 
@@ -220,8 +234,8 @@ class GroupResourceTest {
         GroupDTO dto = GroupDTO.builder().name("New Name").build();
         when(groupService.save(eq(-1L), any(GroupDTO.class))).thenThrow(new RuntimeException("ID inválido"));
         mockMvc.perform(put("/group/-1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isBadRequest());
     }
 
@@ -231,8 +245,8 @@ class GroupResourceTest {
         GroupDTO response = GroupDTO.builder().build();
         when(groupService.save(eq(1L), any(GroupDTO.class))).thenReturn(response);
         mockMvc.perform(put("/group/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{}"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{}"))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.name").doesNotExist());
         verify(groupService).save(eq(1L), any(GroupDTO.class));
@@ -243,8 +257,8 @@ class GroupResourceTest {
     void updateGroup_ServiceReturnsNull_ShouldReturn201ButEmptyBody() throws Exception {
         when(groupService.save(eq(1L), any(GroupDTO.class))).thenReturn(null);
         mockMvc.perform(put("/group/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(validGroupDto)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(validGroupDto)))
                 .andExpect(status().isCreated())
                 .andExpect(content().string(""));
     }

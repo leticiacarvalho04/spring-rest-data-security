@@ -36,236 +36,243 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("test")
 class MemberResourceTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+        @Autowired
+        private MockMvc mockMvc;
 
-    @MockBean
-    private MemberService memberService;
+        @MockBean
+        private MemberService memberService;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+        @Autowired
+        private ObjectMapper objectMapper;
 
-    private MemberDTO validMemberDto;
+        private MemberDTO validMemberDto;
 
-    @Autowired
-    private WebApplicationContext webApplicationContext;
+        @Autowired
+        private WebApplicationContext webApplicationContext;
 
-    @BeforeEach
-    void setUp() {
-        mockMvc = MockMvcBuilders
-                .webAppContextSetup(webApplicationContext)
-                .apply(SecurityMockMvcConfigurers.springSecurity())
-                .build();
+        @BeforeEach
+        void setup() {
+                mockMvc = MockMvcBuilders
+                                .webAppContextSetup(webApplicationContext)
+                                .apply(SecurityMockMvcConfigurers.springSecurity())
+                                .build();
+        }
 
-        validMemberDto = MemberDTO.builder()
-                .id(1L)
-                .name("John")
-                .age(25)
-                .groupId(100L)
-                .build();
-    }
+        @BeforeEach
+        void setUp() {
+                mockMvc = MockMvcBuilders
+                                .webAppContextSetup(webApplicationContext)
+                                .apply(SecurityMockMvcConfigurers.springSecurity())
+                                .build();
 
-    // --- GET ALL MEMBERS ---
+                validMemberDto = MemberDTO.builder()
+                                .id(1L)
+                                .name("John")
+                                .age(25)
+                                .groupId(100L)
+                                .build();
+        }
 
-    @Test
-    @WithMockUser(roles = "ADMIN")
-    void shouldReturnAllMembers_whenGetAllMembersIsCalled() throws Exception {
-        List<MemberDTO> members = List.of(
-                MemberDTO.builder().id(1L).name("John").age(25).groupId(100L).build(),
-                MemberDTO.builder().id(2L).name("Jane").age(30).groupId(200L).build()
-        );
+        // --- GET ALL MEMBERS ---
 
-        when(memberService.getAll()).thenReturn(members);
+        @Test
+        @WithMockUser(roles = "ADMIN")
+        void shouldReturnAllMembers_whenGetAllMembersIsCalled() throws Exception {
+                List<MemberDTO> members = List.of(
+                                MemberDTO.builder().id(1L).name("John").age(25).groupId(100L).build(),
+                                MemberDTO.builder().id(2L).name("Jane").age(30).groupId(200L).build());
 
-        mockMvc.perform(get("/member"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value(1))
-                .andExpect(jsonPath("$[0].name").value("John"));
-    }
+                when(memberService.getAll()).thenReturn(members);
 
-    @Test
-    @WithMockUser(roles = "ADMIN")
-    void getAll_ServiceReturnsEmptyList_ShouldReturnEmptyArray() throws Exception {
-        when(memberService.getAll()).thenReturn(Collections.emptyList());
+                mockMvc.perform(get("/member"))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$[0].id").value(1))
+                                .andExpect(jsonPath("$[0].name").value("John"));
+        }
 
-        mockMvc.perform(get("/member"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.size()").value(0));
-    }
+        @Test
+        @WithMockUser(roles = "ADMIN")
+        void getAll_ServiceReturnsEmptyList_ShouldReturnEmptyArray() throws Exception {
+                when(memberService.getAll()).thenReturn(Collections.emptyList());
 
-    @Test
-    void getAll_Unauthorized_ShouldReturn403() throws Exception {
-        mockMvc.perform(get("/member"))
-                .andExpect(status().isForbidden());
-    }
+                mockMvc.perform(get("/member"))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.size()").value(0));
+        }
 
-    // --- GET MEMBER BY ID ---
+        @Test
+        void getAll_Unauthorized_ShouldReturn403() throws Exception {
+                mockMvc.perform(get("/member"))
+                                .andExpect(status().isForbidden());
+        }
 
-    @Test
-    @WithMockUser(roles = "ADMIN")
-    void shouldReturnMemberById_whenGetMemberByIdIsCalled() throws Exception {
-        when(memberService.findById(1L)).thenReturn(validMemberDto);
+        // --- GET MEMBER BY ID ---
 
-        mockMvc.perform(get("/member/1"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.name").value("John"));
-    }
+        @Test
+        @WithMockUser(roles = "ADMIN")
+        void shouldReturnMemberById_whenGetMemberByIdIsCalled() throws Exception {
+                when(memberService.findById(1L)).thenReturn(validMemberDto);
 
-    @Test
-    @WithMockUser(roles = "ADMIN")
-    void getMemberById_ServiceThrowsException_ShouldReturn400() throws Exception {
-        when(memberService.findById(anyLong()))
-                .thenThrow(new RuntimeException("Erro ao buscar"));
+                mockMvc.perform(get("/member/1"))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.id").value(1))
+                                .andExpect(jsonPath("$.name").value("John"));
+        }
 
-        mockMvc.perform(get("/member/999"))
-                .andExpect(status().isBadRequest());
-    }
+        @Test
+        @WithMockUser(roles = "ADMIN")
+        void getMemberById_ServiceThrowsException_ShouldReturn400() throws Exception {
+                when(memberService.findById(anyLong()))
+                                .thenThrow(new RuntimeException("Erro ao buscar"));
 
-    @Test
-    @WithMockUser(roles = "ADMIN")
-    void getMemberById_ServiceReturnsNull_ShouldReturn200ButEmptyBody() throws Exception {
-        when(memberService.findById(anyLong())).thenReturn(null);
+                mockMvc.perform(get("/member/999"))
+                                .andExpect(status().isBadRequest());
+        }
 
-        mockMvc.perform(get("/member/999"))
-               .andExpect(status().isOk())
-               .andExpect(content().string(""));
-    }
+        @Test
+        @WithMockUser(roles = "ADMIN")
+        void getMemberById_ServiceReturnsNull_ShouldReturn200ButEmptyBody() throws Exception {
+                when(memberService.findById(anyLong())).thenReturn(null);
 
-    @Test
-    void getById_Unauthorized_ShouldReturn403() throws Exception {
-        mockMvc.perform(get("/member/1"))
-                .andExpect(status().isForbidden());
-    }
+                mockMvc.perform(get("/member/999"))
+                                .andExpect(status().isOk())
+                                .andExpect(content().string(""));
+        }
 
-    // --- REGISTER MEMBER ---
+        @Test
+        void getById_Unauthorized_ShouldReturn403() throws Exception {
+                mockMvc.perform(get("/member/1"))
+                                .andExpect(status().isForbidden());
+        }
 
-    @Test
-    @WithMockUser(authorities = {"admin:create"})
-    void shouldCreateMember_whenRegisterIsCalledWithData() throws Exception {
-        MemberDTO request = MemberDTO.builder().name("John").age(25).groupId(100L).build();
-        MemberDTO response = MemberDTO.builder().id(1L).name("John").age(25).groupId(100L).build();
+        // --- REGISTER MEMBER ---
 
-        when(memberService.save(any(MemberDTO.class))).thenReturn(response);
+        @Test
+        @WithMockUser(authorities = { "admin:create" })
+        void shouldCreateMember_whenRegisterIsCalledWithData() throws Exception {
+                MemberDTO request = MemberDTO.builder().name("John").age(25).groupId(100L).build();
+                MemberDTO response = MemberDTO.builder().id(1L).name("John").age(25).groupId(100L).build();
 
-        mockMvc.perform(post("/member")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.name").value("John"));
-    }
+                when(memberService.save(any(MemberDTO.class))).thenReturn(response);
 
-    @Test
-    @WithMockUser(authorities = {"admin:create"})
-    void register_NullRequestBody_ShouldReturn201_BecauseNoValidation() throws Exception {
-        mockMvc.perform(post("/member")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{}"))
-                .andExpect(status().isCreated());
-    }
+                mockMvc.perform(post("/member")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                                .andExpect(status().isCreated())
+                                .andExpect(jsonPath("$.id").value(1))
+                                .andExpect(jsonPath("$.name").value("John"));
+        }
 
-    @Test
-    @WithMockUser(authorities = {"admin:create"})
-    void register_ServiceThrowsException_ShouldReturn400() throws Exception {
-        MemberDTO request = MemberDTO.builder().name("John").age(25).groupId(100L).build();
+        @Test
+        @WithMockUser(authorities = { "admin:create" })
+        void register_NullRequestBody_ShouldReturn201_BecauseNoValidation() throws Exception {
+                mockMvc.perform(post("/member")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{}"))
+                                .andExpect(status().isCreated());
+        }
 
-        when(memberService.save(any(MemberDTO.class)))
-                .thenThrow(new RuntimeException("Erro ao salvar"));
+        @Test
+        @WithMockUser(authorities = { "admin:create" })
+        void register_ServiceThrowsException_ShouldReturn400() throws Exception {
+                MemberDTO request = MemberDTO.builder().name("John").age(25).groupId(100L).build();
 
-        mockMvc.perform(post("/member")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest());
-    }
+                when(memberService.save(any(MemberDTO.class)))
+                                .thenThrow(new RuntimeException("Erro ao salvar"));
 
-    // --- UPDATE MEMBER ---
+                mockMvc.perform(post("/member")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                                .andExpect(status().isBadRequest());
+        }
 
-    @Test
-    @WithMockUser(authorities = {"admin:update"})
-    void shouldUpdateMember_whenUpdateIsCalledWithValidIdAndData() throws Exception {
-        MemberDTO request = MemberDTO.builder().name("John Updated").age(26).groupId(100L).build();
-        MemberDTO response = MemberDTO.builder().id(1L).name("John Updated").age(26).groupId(100L).build();
+        // --- UPDATE MEMBER ---
 
-        when(memberService.save(eq(1L), any(MemberDTO.class))).thenReturn(response);
+        @Test
+        @WithMockUser(authorities = { "admin:update" })
+        void shouldUpdateMember_whenUpdateIsCalledWithValidIdAndData() throws Exception {
+                MemberDTO request = MemberDTO.builder().name("John Updated").age(26).groupId(100L).build();
+                MemberDTO response = MemberDTO.builder().id(1L).name("John Updated").age(26).groupId(100L).build();
 
-        mockMvc.perform(put("/member/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.name").value("John Updated"));
-    }
+                when(memberService.save(eq(1L), any(MemberDTO.class))).thenReturn(response);
 
-    @Test
-    @WithMockUser(authorities = {"admin:update"})
-    void update_EmptyJson_ShouldCallServiceAndReturn201() throws Exception {
-        MemberDTO response = MemberDTO.builder().build();
-        when(memberService.save(eq(1L), any(MemberDTO.class))).thenReturn(response);
+                mockMvc.perform(put("/member/1")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                                .andExpect(status().isCreated())
+                                .andExpect(jsonPath("$.id").value(1))
+                                .andExpect(jsonPath("$.name").value("John Updated"));
+        }
 
-        mockMvc.perform(put("/member/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{}"))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.name").doesNotExist());
-    }
+        @Test
+        @WithMockUser(authorities = { "admin:update" })
+        void update_EmptyJson_ShouldCallServiceAndReturn201() throws Exception {
+                MemberDTO response = MemberDTO.builder().build();
+                when(memberService.save(eq(1L), any(MemberDTO.class))).thenReturn(response);
 
-    @Test
-    @WithMockUser(authorities = {"admin:update"})
-    void update_InvalidId_ShouldReturn400() throws Exception {
-        MemberDTO dto = MemberDTO.builder().name("New Name").age(30).groupId(100L).build();
+                mockMvc.perform(put("/member/1")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{}"))
+                                .andExpect(status().isCreated())
+                                .andExpect(jsonPath("$.name").doesNotExist());
+        }
 
-        when(memberService.save(eq(-1L), any(MemberDTO.class)))
-                .thenThrow(new RuntimeException("ID inválido"));
+        @Test
+        @WithMockUser(authorities = { "admin:update" })
+        void update_InvalidId_ShouldReturn400() throws Exception {
+                MemberDTO dto = MemberDTO.builder().name("New Name").age(30).groupId(100L).build();
 
-        mockMvc.perform(put("/member/-1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
-                .andExpect(status().isBadRequest());
-    }
+                when(memberService.save(eq(-1L), any(MemberDTO.class)))
+                                .thenThrow(new RuntimeException("ID inválido"));
 
-    @Test
-    @WithMockUser(authorities = {"admin:update"})
-    void update_ServiceThrowsException_ShouldReturn400() throws Exception {
-        MemberDTO dto = MemberDTO.builder().name("John Updated").age(26).groupId(100L).build();
+                mockMvc.perform(put("/member/-1")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(dto)))
+                                .andExpect(status().isBadRequest());
+        }
 
-        when(memberService.save(eq(1L), any(MemberDTO.class)))
-                .thenThrow(new RuntimeException("Erro ao atualizar"));
+        @Test
+        @WithMockUser(authorities = { "admin:update" })
+        void update_ServiceThrowsException_ShouldReturn400() throws Exception {
+                MemberDTO dto = MemberDTO.builder().name("John Updated").age(26).groupId(100L).build();
 
-        mockMvc.perform(put("/member/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
-                .andExpect(status().isBadRequest());
-    }
+                when(memberService.save(eq(1L), any(MemberDTO.class)))
+                                .thenThrow(new RuntimeException("Erro ao atualizar"));
 
-    // --- DELETE MEMBER ---
+                mockMvc.perform(put("/member/1")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(dto)))
+                                .andExpect(status().isBadRequest());
+        }
 
-    @Test
-    @WithMockUser(roles = "ADMIN")
-    void shouldDeleteMember_whenDeleteIsCalledWithValidId() throws Exception {
-        doNothing().when(memberService).delete(1L);
+        // --- DELETE MEMBER ---
 
-        mockMvc.perform(delete("/member/1"))
-                .andExpect(status().isNoContent());
+        @Test
+        @WithMockUser(roles = "ADMIN")
+        void shouldDeleteMember_whenDeleteIsCalledWithValidId() throws Exception {
+                doNothing().when(memberService).delete(1L);
 
-        verify(memberService, times(1)).delete(1L);
-    }
+                mockMvc.perform(delete("/member/1"))
+                                .andExpect(status().isNoContent());
 
-    @Test
-    @WithMockUser(roles = "ADMIN")
-    void delete_MissingId_ShouldCallServiceAndReturn204() throws Exception {
-        mockMvc.perform(delete("/member/999"))
-                .andExpect(status().isNoContent());
+                verify(memberService, times(1)).delete(1L);
+        }
 
-        verify(memberService, times(1)).delete(eq(999L));
-    }
+        @Test
+        @WithMockUser(roles = "ADMIN")
+        void delete_MissingId_ShouldCallServiceAndReturn204() throws Exception {
+                mockMvc.perform(delete("/member/999"))
+                                .andExpect(status().isNoContent());
 
-    @Test
-    @WithMockUser(roles = "ADMIN")
-    void delete_ServiceThrowsException_ShouldReturn400() throws Exception {
-        doThrow(new RuntimeException("Erro ao deletar")).when(memberService).delete(eq(1L));
+                verify(memberService, times(1)).delete(eq(999L));
+        }
 
-        mockMvc.perform(delete("/member/1"))
-                .andExpect(status().isBadRequest());
-    }
+        @Test
+        @WithMockUser(roles = "ADMIN")
+        void delete_ServiceThrowsException_ShouldReturn400() throws Exception {
+                doThrow(new RuntimeException("Erro ao deletar")).when(memberService).delete(eq(1L));
+
+                mockMvc.perform(delete("/member/1"))
+                                .andExpect(status().isBadRequest());
+        }
 }
