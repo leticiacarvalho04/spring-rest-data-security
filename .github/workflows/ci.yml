@@ -16,8 +16,17 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-      - name: Build and run unit tests
-        run: mvn clean test
+      - name: Cache Maven packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+      - name: Build (compile and resolve dependencies)
+        run: mvn clean install -DskipTests
+      - name: Run unit tests
+        run: mvn test
       - name: Generate JaCoCo report
         run: mvn jacoco:report
 

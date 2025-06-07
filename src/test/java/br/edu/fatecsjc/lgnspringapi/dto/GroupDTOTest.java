@@ -145,4 +145,161 @@ class GroupDTOTest {
         assertEquals(dto1.hashCode(), dto2.hashCode());
         assertNotEquals(dto1.hashCode(), differentDTO.hashCode());
     }
+
+    @Test
+    void shouldEqualsHandleNullAndOtherTypes() {
+        GroupDTO dto = GroupDTO.builder()
+                .id(1L)
+                .name("Team X")
+                .members(List.of())
+                .organization(OrganizationDTO.builder().name("Org X").build())
+                .build();
+
+        assertNotEquals(dto, null);
+        assertNotEquals(dto, "not a GroupDTO");
+        assertEquals(dto, dto); // reflexivo
+    }
+
+    @Test
+    void shouldHandleNullFieldsInEqualsAndHashCodeAndToString() {
+        GroupDTO dto1 = new GroupDTO();
+        GroupDTO dto2 = new GroupDTO();
+
+        assertEquals(dto1, dto2);
+        assertEquals(dto1.hashCode(), dto2.hashCode());
+
+        String toString = dto1.toString();
+        assertNotNull(toString);
+        assertTrue(toString.contains("GroupDTO"));
+    }
+
+    @Test
+    void shouldNotBeEqualWhenOnlyIdDiffers() {
+        GroupDTO dto1 = GroupDTO.builder()
+                .id(1L)
+                .name("Team")
+                .members(List.of())
+                .organization(OrganizationDTO.builder().name("Org").build())
+                .build();
+
+        GroupDTO dto2 = GroupDTO.builder()
+                .id(2L)
+                .name("Team")
+                .members(List.of())
+                .organization(OrganizationDTO.builder().name("Org").build())
+                .build();
+
+        assertNotEquals(dto1, dto2);
+    }
+
+    @Test
+    void shouldNotBeEqualWhenOnlyNameDiffers() {
+        GroupDTO dto1 = GroupDTO.builder()
+                .id(1L)
+                .name("Team A")
+                .members(List.of())
+                .organization(OrganizationDTO.builder().name("Org").build())
+                .build();
+
+        GroupDTO dto2 = GroupDTO.builder()
+                .id(1L)
+                .name("Team B")
+                .members(List.of())
+                .organization(OrganizationDTO.builder().name("Org").build())
+                .build();
+
+        assertNotEquals(dto1, dto2);
+    }
+
+    @Test
+    void shouldNotBeEqualWhenOnlyMembersDiffers() {
+        MemberDTO memberA = MemberDTO.builder().name("A").build();
+        MemberDTO memberB = MemberDTO.builder().name("B").build();
+
+        GroupDTO dto1 = GroupDTO.builder()
+                .id(1L)
+                .name("Team")
+                .members(List.of(memberA))
+                .organization(OrganizationDTO.builder().name("Org").build())
+                .build();
+
+        GroupDTO dto2 = GroupDTO.builder()
+                .id(1L)
+                .name("Team")
+                .members(List.of(memberB))
+                .organization(OrganizationDTO.builder().name("Org").build())
+                .build();
+
+        assertNotEquals(dto1, dto2);
+    }
+
+    @Test
+    void shouldNotBeEqualWhenOnlyOrganizationDiffers() {
+        GroupDTO dto1 = GroupDTO.builder()
+                .id(1L)
+                .name("Team")
+                .members(List.of())
+                .organization(OrganizationDTO.builder().name("Org1").build())
+                .build();
+
+        GroupDTO dto2 = GroupDTO.builder()
+                .id(1L)
+                .name("Team")
+                .members(List.of())
+                .organization(OrganizationDTO.builder().name("Org2").build())
+                .build();
+
+        assertNotEquals(dto1, dto2);
+    }
+
+    @Test
+    void shouldUseAllArgsConstructorWithNulls() {
+        GroupDTO dto = new GroupDTO(null, null, null, null);
+        assertNull(dto.getId());
+        assertNull(dto.getName());
+        assertNull(dto.getMembers());
+        assertNull(dto.getOrganization());
+    }
+
+    @Test
+    void shouldUseBuilderWithNulls() {
+        GroupDTO dto = GroupDTO.builder()
+                .id(null)
+                .name(null)
+                .members(null)
+                .organization(null)
+                .build();
+        assertNull(dto.getId());
+        assertNull(dto.getName());
+        assertNull(dto.getMembers());
+        assertNull(dto.getOrganization());
+    }
+
+    @Test
+    void shouldToStringHandleNullFields() {
+        GroupDTO dto = new GroupDTO(null, null, null, null);
+        String str = dto.toString();
+        assertNotNull(str);
+        assertTrue(str.contains("GroupDTO"));
+    }
+
+    @Test
+    void shouldEqualsAndHashCodeHandleNullAndEmptyMembers() {
+        GroupDTO dto1 = GroupDTO.builder()
+                .id(1L)
+                .name("Team")
+                .members(null)
+                .organization(null)
+                .build();
+
+        GroupDTO dto2 = GroupDTO.builder()
+                .id(1L)
+                .name("Team")
+                .members(new ArrayList<>())
+                .organization(null)
+                .build();
+
+        assertNotEquals(dto1, dto2);
+        assertNotEquals(dto1.hashCode(), dto2.hashCode());
+    }
 }
