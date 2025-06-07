@@ -27,7 +27,6 @@ import static org.mockito.Mockito.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@Import(TestSecurityConfig.class)
 class OrganizationResourceTest {
 
 	@MockBean
