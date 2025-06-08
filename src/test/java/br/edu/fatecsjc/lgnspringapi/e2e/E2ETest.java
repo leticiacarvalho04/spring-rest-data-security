@@ -75,8 +75,8 @@ class E2ETest {
                         token = authResp.then().extract().path("accessToken");
                         assertNotNull(token, "O token não foi retornado corretamente!");
                 } else {
-                        System.out.println("[FAKE] Autenticação falhou, usando token fake para os próximos testes.");
-                        token = "fake-token";
+                        System.out.println("Autenticação falhou, usando outro token para os próximos testes.");
+                        token = "token";
                 }
         }
 

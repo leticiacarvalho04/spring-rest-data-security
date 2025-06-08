@@ -62,4 +62,10 @@ public class OpenApiConfigTest {
         assertThat(securityScheme.bearerFormat()).isEqualTo("JWT");
         assertThat(securityScheme.in()).isEqualTo(SecuritySchemeIn.HEADER);
     }
+
+    @Test
+    void shouldPingSuccessfully() {
+        OpenApiConfig config = new OpenApiConfig();
+        assertThat(config.ping()).isEqualTo("pong");
+    }
 }
