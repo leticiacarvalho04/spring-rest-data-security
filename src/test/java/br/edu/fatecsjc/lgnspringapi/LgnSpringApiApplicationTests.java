@@ -6,18 +6,18 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest
 class LgnSpringApiApplicationTests {
 
-	@Test
-	void contextLoads() {
-	}
+    @Test
+    void contextLoads() {
+    }
 
-	@Test
-	void testMainMethod() {
-		String[] args = {};
-		LgnSpringApiApplication.main(args);
-	}
+    @Test
+    void testMainMethod() {
+        String[] args = {};
+        LgnSpringApiApplication.main(args);
+    }
 
-	@Test
-	void testNoArgsConstructor() {
-		new LgnSpringApiApplication();
-	}
+    @Test
+    void testNoArgsConstructor() {
+        new LgnSpringApiApplication();
+    }
 }
