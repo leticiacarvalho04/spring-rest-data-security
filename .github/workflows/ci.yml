@@ -116,4 +116,4 @@ jobs:
           SPRING_DATASOURCE_URL: jdbc:mariadb://127.0.0.1:3307/sample
           SPRING_DATASOURCE_USERNAME: root
           SPRING_DATASOURCE_PASSWORD: root
-        run: mvn verify -Psystem-test -Dspring.profiles.active=system-test
+        run: mvn verify -Dspring.profiles.active=test
