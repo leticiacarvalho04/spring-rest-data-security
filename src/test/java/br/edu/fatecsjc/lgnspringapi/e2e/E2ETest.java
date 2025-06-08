@@ -208,7 +208,7 @@ class E2ETest {
         void deveListarTodosRecursos() {
                 assumeTrue(token != null, "Token nulo, falha no login");
 
-                String[] endpoints = { "/organization", "/group", "/member", "/marathon" };
+                String[] endpoints = { "/organization", "/group", "/member", "/marathons" };
 
                 for (String endpoint : endpoints) {
                         Response resp = RestAssured.given()
