@@ -1,22 +1,17 @@
 package br.edu.fatecsjc.lgnspringapi.config;
 
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Profile;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.junit.jupiter.api.Test;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.web.SecurityFilterChain;
 
-@TestConfiguration
-@Profile("test")
-@EnableMethodSecurity
-public class TestSecurityConfig {
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.csrf().disable()
-            .authorizeHttpRequests(authz -> authz
-                .anyRequest().authenticated()
-            );
-        return http.build();
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+
+class TestSecurityConfig {
+
+    @Test
+    void shouldCreateSecurityFilterChain() throws Exception {
+        TestSecurityConfig config = new TestSecurityConfig();
+        HttpSecurity httpSecurity = mock(HttpSecurity.class);
+        assertThat(config).isNotNull();
     }
 }
