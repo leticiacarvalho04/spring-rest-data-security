@@ -16,4 +16,8 @@ class LgnSpringApiApplicationTests {
 		LgnSpringApiApplication.main(args);
 	}
 
+	@Test
+	void testNoArgsConstructor() {
+		new LgnSpringApiApplication();
+	}
 }
