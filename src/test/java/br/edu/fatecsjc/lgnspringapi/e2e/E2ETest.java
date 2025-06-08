@@ -180,7 +180,7 @@ class E2ETest {
 
                 var marathonBody = """
                                     {
-                                      "name": "Maratona E2E",
+                                      "identification": "Maratona E2E",
                                       "weight": 1.5,
                                       "score": 100,
                                       "members": []
@@ -197,7 +197,7 @@ class E2ETest {
 
                 marathonId = resp.then()
                                 .statusCode(anyOf(is(200), is(201)))
-                                .body("name", equalTo("Maratona E2E"))
+                                .body("identification", equalTo("Maratona E2E"))
                                 .extract().path("id").toString();
 
                 assertNotNull(marathonId);
