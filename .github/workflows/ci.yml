@@ -111,6 +111,7 @@ jobs:
         run: |
           mvn org.jacoco:jacoco-maven-plugin:prepare-agent
           mvn org.jacoco:jacoco-maven-plugin:report -Djacoco.dataFile=target/jacoco-merged.exec -Djacoco.outputDirectory=target/merged-report
+        working-directory: .
 
       - name: Upload Merged Jacoco XML Report
         uses: actions/upload-artifact@v4
