@@ -107,11 +107,16 @@ jobs:
           wget https://repo1.maven.org/maven2/org/jacoco/org.jacoco.cli/0.8.8/org.jacoco.cli-0.8.8-nodeps.jar
           java -jar org.jacoco.cli-0.8.8-nodeps.jar merge jacoco-unit/jacoco.exec jacoco-e2e/jacoco.exec --destfile target/jacoco-merged.exec
 
-      - name: Upload Merged Jacoco Report
+      - name: Generate Jacoco XML Report from merged .exec
+        run: |
+          mvn org.jacoco:jacoco-maven-plugin:prepare-agent
+          mvn org.jacoco:jacoco-maven-plugin:report -Djacoco.dataFile=target/jacoco-merged.exec -Djacoco.outputDirectory=target/merged-report
+
+      - name: Upload Merged Jacoco XML Report
         uses: actions/upload-artifact@v4
         with:
-          name: jacoco-merged
-          path: target/jacoco-merged.exec
+          name: jacoco-merged-xml
+          path: target/merged-report/jacoco.xml
 
   static-analysis:
     name: Static Analysis with SonarCloud
@@ -135,13 +140,13 @@ jobs:
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-maven
 
-      - name: Download Merged Jacoco Report
+      - name: Download Merged Jacoco XML Report
         uses: actions/download-artifact@v4
         with:
-          name: jacoco-merged
-          path: target
+          name: jacoco-merged-xml
+          path: target/merged-report
 
       - name: Build and Analyze with SonarCloud
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: mvn verify sonar:sonar -Dspring.profiles.active=test -Dsonar.projectKey=leticiacarvalho04_spring-rest-data-security -Dsonar.organization=leticiacarvalho04 -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=$SONAR_TOKEN -Dsonar.coverage.jacoco.xmlReportPaths=target/jacoco-merged.exec
+        run: mvn verify sonar:sonar -Dspring.profiles.active=test -Dsonar.projectKey=leticiacarvalho04_spring-rest-data-security -Dsonar.organization=leticiacarvalho04 -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=$SONAR_TOKEN -Dsonar.coverage.jacoco.xmlReportPaths=target/merged-report/jacoco.xml
