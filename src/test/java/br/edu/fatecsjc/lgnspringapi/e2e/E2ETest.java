@@ -116,7 +116,7 @@ class E2ETest {
 
         @Test
         @Order(3)
-        void shouldCreateOrganization() {
+        void shouldCreateGroupWithOrganization() {
                 assumeTrue(token != null && organizationId != null, "Pré-condições falharam");
 
                 var groupBody = String.format("""
