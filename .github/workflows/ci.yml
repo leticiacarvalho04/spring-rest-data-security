@@ -34,12 +34,88 @@ jobs:
       - name: Upload JaCoCo Report
         uses: actions/upload-artifact@v4
         with:
-          name: jacoco-report
-          path: target/jacoco-report/jacoco.xml
+          name: jacoco-unit
+          path: target/jacoco.exec
+
+  system-test:
+    name: API System Tests
+    needs: unit-test
+    runs-on: ubuntu-latest
+
+    services:
+      mariadb:
+        image: mariadb:10.4
+        ports:
+          - 3307:3306
+        env:
+          MARIADB_ROOT_PASSWORD: root
+          MARIADB_DATABASE: sample
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot || exit 1"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=30
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: "17"
+          distribution: "temurin"
+
+      - name: Wait for MariaDB to be ready
+        run: |
+          for i in {1..30}; do
+            nc -z 127.0.0.1 3307 && echo "MariaDB is up!" && exit 0
+            echo "Waiting for MariaDB..."
+            sleep 2
+          done
+          echo "MariaDB did not start in time" && exit 1
+
+      - name: Run only E2E Tests
+        run: mvn verify -Dspring.profiles.active=system-test -Dtest=br.edu.fatecsjc.lgnspringapi.e2e.E2ETest
+
+      - name: Upload JaCoCo E2E Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-e2e
+          path: target/jacoco.exec
+
+  merge-coverage:
+    name: Merge Coverage Reports
+    needs: [unit-test, system-test]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Unit Test Coverage
+        uses: actions/download-artifact@v4
+        with:
+          name: jacoco-unit
+          path: jacoco-unit
+
+      - name: Download E2E Coverage
+        uses: actions/download-artifact@v4
+        with:
+          name: jacoco-e2e
+          path: jacoco-e2e
+
+      - name: Merge Jacoco Reports
+        run: |
+          mkdir -p target
+          wget https://repo1.maven.org/maven2/org/jacoco/org.jacoco.cli/0.8.8/org.jacoco.cli-0.8.8-nodeps.jar
+          java -jar org.jacoco.cli-0.8.8-nodeps.jar merge jacoco-unit/jacoco.exec jacoco-e2e/jacoco.exec --destfile target/jacoco-merged.exec
+
+      - name: Upload Merged Jacoco Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-merged
+          path: target/jacoco-merged.exec
 
   static-analysis:
     name: Static Analysis with SonarCloud
-    needs: unit-test
+    needs: merge-coverage
     runs-on: ubuntu-latest
 
     steps:
@@ -59,53 +135,13 @@ jobs:
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-maven
 
-      - name: Download JaCoCo Report
+      - name: Download Merged Jacoco Report
         uses: actions/download-artifact@v4
         with:
-          name: jacoco-report
+          name: jacoco-merged
+          path: target
 
       - name: Build and Analyze with SonarCloud
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: mvn verify sonar:sonar -Dspring.profiles.active=test -Dsonar.projectKey=leticiacarvalho04_spring-rest-data-security -Dsonar.organization=leticiacarvalho04 -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=$SONAR_TOKEN -Dsonar.coverage.jacoco.xmlReportPaths=target/jacoco-report/jacoco.xml
-
-  system-test:
-    name: API System Tests
-    needs: static-analysis
-    runs-on: ubuntu-latest
-  
-    services:
-      mariadb:
-        image: mariadb:10.4
-        ports:
-          - 3307:3306
-        env:
-          MARIADB_ROOT_PASSWORD: root
-          MARIADB_DATABASE: sample
-        options: >-
-          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot || exit 1"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=30
-  
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
-  
-      - name: Set up JDK 17
-        uses: actions/setup-java@v3
-        with:
-          java-version: "17"
-          distribution: "temurin"
-  
-      - name: Wait for MariaDB to be ready
-        run: |
-          for i in {1..30}; do
-            nc -z 127.0.0.1 3307 && echo "MariaDB is up!" && exit 0
-            echo "Waiting for MariaDB..."
-            sleep 2
-          done
-          echo "MariaDB did not start in time" && exit 1
-  
-      - name: Run only E2E Tests
-        run: mvn verify -Dspring.profiles.active=system-test -Dtest=br.edu.fatecsjc.lgnspringapi.e2e.E2ETest
+        run: mvn verify sonar:sonar -Dspring.profiles.active=test -Dsonar.projectKey=leticiacarvalho04_spring-rest-data-security -Dsonar.organization=leticiacarvalho04 -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=$SONAR_TOKEN -Dsonar.coverage.jacoco.xmlReportPaths=target/jacoco-merged.exec
