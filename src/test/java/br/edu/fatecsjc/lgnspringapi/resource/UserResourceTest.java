@@ -14,6 +14,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.security.Principal;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -32,7 +33,7 @@ class UserResourceTest {
     private ObjectMapper objectMapper;
 
     @Test
-    @WithMockUser(username = "test@example.com")
+    @WithMockUser(username = "admin", roles = {"ADMIN"})
     void changePassword_ShouldCallServiceAndReturn200() throws Exception {
         ChangePasswordRequestDTO dto = ChangePasswordRequestDTO.builder()
                 .currentPassword("oldPass123")
