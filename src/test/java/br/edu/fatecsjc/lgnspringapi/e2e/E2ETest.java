@@ -191,9 +191,9 @@ class E2ETest {
                                 .header("Authorization", "Bearer " + token)
                                 .contentType(ContentType.JSON)
                                 .body(marathonBody)
-                                .when().post("/marathon");
+                                .when().post("/marathons");
 
-                assumeTrue(resp.statusCode() != 404, "Endpoint /marathon não encontrado");
+                assumeTrue(resp.statusCode() != 404, "Endpoint /marathons não encontrado");
 
                 marathonId = resp.then()
                                 .statusCode(anyOf(is(200), is(201)))
