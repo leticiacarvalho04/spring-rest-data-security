@@ -114,7 +114,8 @@ jobs:
 
       - name: Generate Jacoco XML Report from merged .exec
         run: mvn org.jacoco:jacoco-maven-plugin:report -Djacoco.dataFile=target/jacoco-merged.exec -Djacoco.outputDirectory=target/merged-report
-
+        working-directory: ${{ github.workspace }}
+        
       - name: Upload Merged Jacoco XML Report
         uses: actions/upload-artifact@v4
         with:
