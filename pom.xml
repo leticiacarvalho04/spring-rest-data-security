@@ -229,6 +229,7 @@
                 </plugins>
             </build>
         </profile>
+
         <profile>
             <id>system-test</id>
             <build>
@@ -254,6 +255,15 @@
                 </plugins>
             </build>
         </profile>
-    </profiles>
 
+        <profile>
+            <id>test</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <includeE2E>true</includeE2E>
+            </properties>
+        </profile>
+    </profiles>
 </project>
