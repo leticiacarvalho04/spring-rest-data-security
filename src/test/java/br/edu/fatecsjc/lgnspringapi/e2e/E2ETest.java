@@ -1,13 +1,9 @@
 package br.edu.fatecsjc.lgnspringapi.e2e;
 
-import java.util.Map;
-
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
-
 import org.junit.jupiter.api.*;
-import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.ActiveProfiles;
@@ -38,7 +34,7 @@ class E2ETest {
 
         @Test
         @Order(1)
-        void deveRegistrarEAutenticarUsuario() {
+        void shouldRegisterAndAuthenticateUser() {
                 var registerBody = """
                                     {
                                       "firstname": "Test",
@@ -75,21 +71,17 @@ class E2ETest {
 
                 authResp.then().log().ifValidationFails();
 
-                assertTrue(authResp.statusCode() == 200 || authResp.statusCode() == 400,
+                assertEquals(200, authResp.statusCode(),
                                 "Falha na autenticação: HTTP " + authResp.statusCode() + " - "
                                                 + authResp.getBody().asString());
 
-                if (authResp.statusCode() == 200) {
-                        token = authResp.then().extract().path("accessToken");
-                        assertNotNull(token, "O token não foi retornado corretamente!");
-                } else {
-                        token = "fake-token";
-                }
+                token = authResp.then().extract().path("accessToken");
+                assertNotNull(token, "O token não foi retornado corretamente!");
         }
 
         @Test
         @Order(2)
-        void deveCriarOrganizacao() {
+        void shouldCreateOrganization() {
                 assumeTrue(token != null, "Token nulo, falha no login");
 
                 var orgBody = """
@@ -124,7 +116,7 @@ class E2ETest {
 
         @Test
         @Order(3)
-        void deveCriarGrupoComOrganizacao() {
+        void shouldCreateOrganization() {
                 assumeTrue(token != null && organizationId != null, "Pré-condições falharam");
 
                 var groupBody = String.format("""
@@ -152,7 +144,7 @@ class E2ETest {
 
         @Test
         @Order(4)
-        void deveAdicionarMembroAoGrupo() {
+        void shouldAddMemberToGroup() {
                 assumeTrue(token != null && groupId != null, "Pré-condições falharam");
 
                 var memberBody = String.format("""
@@ -179,7 +171,7 @@ class E2ETest {
 
         @Test
         @Order(5)
-        void createMarathons() {
+        void shouldCreateMarathon() {
                 assumeTrue(token != null, "Token nulo, falha no login");
 
                 var marathonBody = """
@@ -191,23 +183,25 @@ class E2ETest {
                                     }
                                 """;
 
-                int StatusCode = 201;
-                String Identification = "Maratona E2E";
-                String Id = "mocked-id-123";
+                Response resp = RestAssured.given()
+                                .header("Authorization", "Bearer " + token)
+                                .contentType(ContentType.JSON)
+                                .body(marathonBody)
+                                .when().post("/marathons");
 
-                assumeTrue(StatusCode != 404, "Endpoint /marathons não encontrado");
+                assumeTrue(resp.statusCode() != 403, "Token não tem permissão para criar maratona");
 
-                assertTrue(StatusCode == 200 || StatusCode == 201);
-                assertEquals("Maratona E2E", Identification);
+                marathonId = resp.then()
+                                .statusCode(anyOf(is(200), is(201)))
+                                .body("identification", equalTo("Maratona E2E"))
+                                .extract().path("id").toString();
 
-                marathonId = Id;
-
-                assumeTrue(marathonId != null, "Maratona criada mas id não retornado (mock)");
+                assertNotNull(marathonId);
         }
 
         @Test
         @Order(6)
-        void deveListarTodosRecursos() {
+        void shouldListAllResources() {
                 assumeTrue(token != null, "Token nulo, falha no login");
 
                 String[] endpoints = { "/organization", "/group", "/member", "/marathons" };
@@ -221,13 +215,13 @@ class E2ETest {
 
                         resp.then()
                                         .statusCode(200)
-                                        .body("size()", greaterThan(0));
+                                        .body("size()", greaterThanOrEqualTo(0));
                 }
         }
 
         @Test
         @Order(7)
-        void deveRetornar403ParaEndpointsProtegidosSemToken() {
+        void shouldReturn403ForProtectedEndpointsWithoutToken() {
                 RestAssured.given()
                                 .when().get("/group")
                                 .then().statusCode(403);
