@@ -101,11 +101,16 @@ jobs:
           name: jacoco-e2e
           path: jacoco-e2e
 
-      - name: Merge Jacoco Reports
+      - name: Move Jacoco exec files to target
         run: |
           mkdir -p target
+          cp jacoco-unit/jacoco.exec target/jacoco-unit.exec
+          cp jacoco-e2e/jacoco.exec target/jacoco-e2e.exec
+
+      - name: Merge Jacoco Reports
+        run: |
           wget https://repo1.maven.org/maven2/org/jacoco/org.jacoco.cli/0.8.8/org.jacoco.cli-0.8.8-nodeps.jar
-          java -jar org.jacoco.cli-0.8.8-nodeps.jar merge jacoco-unit/jacoco.exec jacoco-e2e/jacoco.exec --destfile target/jacoco-merged.exec
+          java -jar org.jacoco.cli-0.8.8-nodeps.jar merge target/jacoco-unit.exec target/jacoco-e2e.exec --destfile target/jacoco-merged.exec
 
       - name: Generate Jacoco XML Report from merged .exec
         run: mvn org.jacoco:jacoco-maven-plugin:report -Djacoco.dataFile=target/jacoco-merged.exec -Djacoco.outputDirectory=target/merged-report
