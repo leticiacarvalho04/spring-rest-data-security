@@ -19,11 +19,10 @@ public class GenericResourceExceptionHandler extends ResponseEntityExceptionHand
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiErrorDTO> handleGenericException(HttpServletRequest req, Exception exception) throws Exception {
-        // Deixa o AccessDenied ser tratado pelo SecurityExceptionHandler
         if (exception instanceof AccessDeniedException) {
             throw (AccessDeniedException) exception;
         }
-
+        
         ApiErrorDTO error = ApiErrorDTO.builder()
                 .message("An unknown error occurred in API processing")
                 .timestamp(Instant.now())

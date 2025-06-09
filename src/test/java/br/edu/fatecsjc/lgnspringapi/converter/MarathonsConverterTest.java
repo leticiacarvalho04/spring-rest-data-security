@@ -1,4 +1,4 @@
-package br.edu.fatecsjc.converter;
+package br.edu.fatecsjc.lgnspringapi.converter;
 
 import br.edu.fatecsjc.lgnspringapi.converter.MarathonsConverter;
 import br.edu.fatecsjc.lgnspringapi.dto.MarathonsDTO;

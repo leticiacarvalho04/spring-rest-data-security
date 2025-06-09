@@ -1,4 +1,4 @@
-package br.edu.fatecsjc.converter;
+package br.edu.fatecsjc.lgnspringapi.converter;
 
 import org.junit.jupiter.api.Test;
 import java.util.List;

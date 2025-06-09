@@ -1,9 +1,8 @@
 package br.edu.fatecsjc.lgnspringapi.entity;
 
+import br.edu.fatecsjc.lgnspringapi.enums.TokenType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import br.edu.fatecsjc.lgnspringapi.enums.TokenType;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -280,5 +279,12 @@ class TokenTest {
         Token t1 = Token.builder().revoked(false).build();
         Token t2 = Token.builder().revoked(true).build();
         assertNotEquals(t1, t2);
+    }
+
+    @Test
+    void shouldAcceptLongTokenString() {
+        String longToken = "a".repeat(1000);
+        token.setToken(longToken);
+        assertThat(token.getToken()).hasSize(1000);
     }
 }

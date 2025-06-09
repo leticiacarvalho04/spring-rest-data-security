@@ -2,6 +2,8 @@ package br.edu.fatecsjc.lgnspringapi.converter;
 
 import br.edu.fatecsjc.lgnspringapi.dto.GroupDTO;
 import br.edu.fatecsjc.lgnspringapi.entity.Group;
+import br.edu.fatecsjc.lgnspringapi.repository.OrganizationRepository;
+
 import org.modelmapper.ModelMapper;
 import org.modelmapper.Provider;
 import org.modelmapper.TypeMap;
@@ -18,25 +20,39 @@ public class GroupConverter implements Converter<Group, GroupDTO> {
     private ModelMapper modelMapper;
 
     private TypeMap<GroupDTO, Group> propertyMapperDto;
+
+    @Autowired
+    private OrganizationRepository organizationRepository;
     
     public GroupConverter(ModelMapper modelMapper) {
         this.modelMapper = modelMapper;
     }
 
+
     @Override
     public Group convertToEntity(GroupDTO dto) {
-        if(propertyMapperDto == null) {
+        if (propertyMapperDto == null) {
             propertyMapperDto = modelMapper.createTypeMap(GroupDTO.class, Group.class);
             propertyMapperDto.addMappings(mapper -> mapper.skip(Group::setId));
         }
 
         Group entity = modelMapper.map(dto, Group.class);
+
+        entity.setId(null);
+
         Provider<Group> groupProvider = p -> new Group();
         propertyMapperDto.setProvider(groupProvider);
 
-        entity.getMembers().forEach(m -> {
-            m.setGroup(entity);
-        });
+        if (dto.getOrganization() != null && dto.getOrganization().getId() != null) {
+            entity.setOrganization(
+                organizationRepository.findById(dto.getOrganization().getId())
+                    .orElseThrow(() -> new IllegalArgumentException("Organization not found"))
+            );
+        }
+
+        if (entity.getMembers() != null) {
+            entity.getMembers().forEach(m -> m.setGroup(entity));
+        }
         return entity;
     }
 

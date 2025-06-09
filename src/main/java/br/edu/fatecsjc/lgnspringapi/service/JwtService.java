@@ -6,6 +6,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -15,6 +16,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import org.springframework.security.core.GrantedAuthority;
 
 @Service
 public class JwtService {
@@ -36,27 +40,28 @@ public class JwtService {
     }
 
     public String generateToken(UserDetails userDetails) {
-        return generateToken(new HashMap<>(), userDetails);
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("authorities", userDetails.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.toList()));
+        return buildToken(claims, userDetails, jwtExpiration);
     }
 
     public String generateToken(
             Map<String, Object> extraClaims,
-            UserDetails userDetails
-    ) {
+            UserDetails userDetails) {
         return buildToken(extraClaims, userDetails, jwtExpiration);
     }
 
     public String generateRefreshToken(
-            UserDetails userDetails
-    ) {
+            UserDetails userDetails) {
         return buildToken(new HashMap<>(), userDetails, refreshExpiration);
     }
 
     private String buildToken(
             Map<String, Object> extraClaims,
             UserDetails userDetails,
-            long expiration
-    ) {
+            long expiration) {
         return Jwts
                 .builder()
                 .setClaims(extraClaims)
@@ -82,11 +87,11 @@ public class JwtService {
 
     private Date extractExpiration(String token) {
         return Jwts.parserBuilder()
-            .setSigningKey(getSignInKey())
-            .build()
-            .parseClaimsJws(token)
-            .getBody()
-            .getExpiration();
+                .setSigningKey(getSignInKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .getExpiration();
     }
 
     private Claims extractAllClaims(String token) {

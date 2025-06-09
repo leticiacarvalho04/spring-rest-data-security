@@ -1,4 +1,4 @@
-package br.edu.fatecsjc.converter;
+package br.edu.fatecsjc.lgnspringapi.converter;
 
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach;

@@ -11,10 +11,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class UserTest {
 
@@ -77,7 +74,7 @@ class UserTest {
         Collection<? extends GrantedAuthority> authorities = userDetails.getAuthorities();
 
         assertThat(authorities).extracting("authority")
-                .containsExactlyInAnyOrder("ROLE_USER", "READ");
+                .containsExactlyInAnyOrder("ROLE_USER");
 
         assertThat(userDetails.getUsername()).isEqualTo("joao@example.com");
         assertThat(userDetails.getPassword()).isEqualTo("encoded_password");

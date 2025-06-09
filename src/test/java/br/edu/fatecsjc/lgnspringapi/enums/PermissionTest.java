@@ -12,20 +12,23 @@ class PermissionTest {
 
     @Test
     void shouldHaveCorrectValues() {
-        Permission adminCreate = Permission.ADMIN_CREATE;
-        Permission adminUpdate = Permission.ADMIN_UPDATE;
-
-        assertEquals("admin:create", adminCreate.getPermission());
-        assertEquals("admin:update", adminUpdate.getPermission());
+        assertEquals("admin:create", Permission.ADMIN_CREATE.getPermission());
+        assertEquals("admin:update", Permission.ADMIN_UPDATE.getPermission());
+        assertEquals("admin:delete", Permission.ADMIN_DELETE.getPermission());
+        assertEquals("admin:read", Permission.ADMIN_READ.getPermission());
     }
 
     @Test
     void shouldReturnCorrectNameAndOrdinal() {
         assertEquals("ADMIN_CREATE", Permission.ADMIN_CREATE.name());
-        assertEquals(0, Permission.ADMIN_CREATE.ordinal());
-
         assertEquals("ADMIN_UPDATE", Permission.ADMIN_UPDATE.name());
+        assertEquals("ADMIN_DELETE", Permission.ADMIN_DELETE.name());
+        assertEquals("ADMIN_READ", Permission.ADMIN_READ.name());
+
+        assertEquals(0, Permission.ADMIN_CREATE.ordinal());
         assertEquals(1, Permission.ADMIN_UPDATE.ordinal());
+        assertEquals(2, Permission.ADMIN_DELETE.ordinal());
+        assertEquals(3, Permission.ADMIN_READ.ordinal());
     }
 
     @Test
@@ -33,9 +36,11 @@ class PermissionTest {
         Permission[] permissions = Permission.values();
 
         assertNotNull(permissions);
-        assertEquals(2, permissions.length);
+        assertEquals(4, permissions.length);
         assertTrue(java.util.Arrays.asList(permissions).contains(Permission.ADMIN_CREATE));
         assertTrue(java.util.Arrays.asList(permissions).contains(Permission.ADMIN_UPDATE));
+        assertTrue(java.util.Arrays.asList(permissions).contains(Permission.ADMIN_DELETE));
+        assertTrue(java.util.Arrays.asList(permissions).contains(Permission.ADMIN_READ));
     }
 
     @Test

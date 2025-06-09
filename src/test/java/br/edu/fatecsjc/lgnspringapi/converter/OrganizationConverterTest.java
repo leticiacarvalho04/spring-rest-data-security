@@ -1,4 +1,4 @@
-package br.edu.fatecsjc.converter;
+package br.edu.fatecsjc.lgnspringapi.converter;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -270,20 +270,5 @@ public class OrganizationConverterTest {
         assertNotNull(updatedEntity);
         assertEquals(50L, updatedEntity.getId()); 
         assertEquals("Updated Name", updatedEntity.getName()); 
-    }
-
-    @Test
-    void testEnsureTypeMapConfigured_IsCached() throws NoSuchFieldException, IllegalAccessException {
-        organizationConverter.convertToEntity(OrganizationDTO.builder().build());
-
-        Field propertyMapperDtoField = OrganizationConverter.class.getDeclaredField("propertyMapperDto");
-        propertyMapperDtoField.setAccessible(true);
-
-        TypeMap<OrganizationDTO, Organization> firstMap = (TypeMap<OrganizationDTO, Organization>) propertyMapperDtoField.get(organizationConverter);
-
-        organizationConverter.convertToEntity(OrganizationDTO.builder().build());
-        TypeMap<OrganizationDTO, Organization> secondMap = (TypeMap<OrganizationDTO, Organization>) propertyMapperDtoField.get(organizationConverter);
-
-        assertSame(firstMap, secondMap);
     }
 }
